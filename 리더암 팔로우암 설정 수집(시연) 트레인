@@ -1,0 +1,176 @@
+sudo apt update
+sudo apt install fcitx5 fcitx5-hangul fcitx5-config-qt fcitx5-configtool -y
+
+
+
+conda activate lerobot
+lerobot-find-port
+lerobot-find-cameras opencv
+
+리더암
+/dev/ttyACM0
+
+
+팔로우암
+/dev/ttyACM1
+
+
+
+lerobot-setup-motors \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM0
+
+lerobot-setup-motors \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM1
+   
+    
+    
+lerobot-calibrate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower   
+    
+lerobot-calibrate \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader
+    
+    
+lerobot-teleoperate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader
+    
+lerobot-teleoperate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ front: {type: opencv, index_or_path: 4, width: 640, height: 480, fps: 30}, top: {type: opencv, index_or_path: 6, width: 640, height: 480, fps: 30}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --display_data=true
+    
+
+
+=================================================
+다운로드가 안되는 이유 mjpg으로 수정
+
+lerobot-teleoperate \
+    --robot.type=so101_fol어lower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ wrist: {type: opencv, index_or_path: 6, width: 640, height: 480, fps: 30, fourcc: MJPG}, top: {type: intelrealsense, serial_number_or_name: 116622071569, width: 640, height: 480, fps: 30}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --display_data=true
+===============================================
+udev 후에 실행명령
+
+lerobot-teleoperate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ wrist: {type: opencv, index_or_path: /dev/wrist_cam, width: 640, height: 480, fps: 30, fourcc: MJPG}, top: {type: intelrealsense, serial_number_or_name: 116622071569, width: 640, height: 480, fps: 30}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --display_data=true
+================================================
+
+
+lerobot-record \
+    --robot.type=so101_follower \
+    --robot.port=/dev/tty.usbmodem585A0076841 \
+    --robot.id=my_awesome_follower_arm \
+    --robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 1920, height: 1080, fps: 30}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/tty.usbmodem58760431551 \
+    --teleop.id=my_awesome_leader_arm \
+    --display_data=true \
+    --dataset.repo_id=${HF_USER}/record-test \
+    --dataset.num_episodes=5 \
+    --dataset.single_task="Grab the black cube" \
+    --dataset.streaming_encoding=true \
+    # --dataset.rgb_encoder.vcodec=auto \
+    --dataset.encoder_threads=2
+
+lerobot-record \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM0 \
+    --robot.id=my_follower \
+    --robot.cameras="{ front: {type: opencv, index_or_path: 6, width: 640, height: 480, fps: 30}, top: {type: opencv, index_or_path: 4, width: 640, height: 480, fps: 30}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM1 \
+    --teleop.id=my_leader \
+    --display_data=true \
+    --dataset.repo_id=data/pink_task \
+    --dataset.push_to_hub=false \
+    --dataset.num_episodes=30 \
+    --dataset.single_task="pink block into the box of yellow" \
+    --dataset.streaming_encoding=true \
+    # --dataset.rgb_encoder.vcodec=auto \
+    --dataset.encoder_threads=2
+
+
+
+    lerobot-record  \
+     --robot.type=so101_follower \
+     --robot.port=/dev/ttyACM0 \
+     --robot.id=my_follower \
+     --robot.cameras="{ front: {type: opencv, index_or_path: 6, width: 640, height: 480, fps: 30}, top: {type: opencv, index_or_path: 4, width: 640, height: 480, fps: 30}}" \
+    --display_data=true \
+    --dataset.repo_id=data/eval_pink_task_res18_balanced_run \
+    --dataset.num_episodes=5 \
+    --dataset.reset_time_s=10 \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM1 \
+    --teleop.id=my_leader \
+    --dataset.single_task="pink block into the box of yellow" \
+    --policy.path=outputs/train/act_pink_task_res18_balanced/checkpoints/last/pretrained_model \
+    --policy.device=cuda \
+    --dataset.push_to_hub=false
+    
+
+
+    lerobot-train \
+  --dataset.repo_id=data/pink_task \
+  --policy.type=act \
+  --output_dir=outputs/train/act_pink_task_long \
+  --job_name=act_pink_task_long \
+  --wandb.enable=true \
+  --policy.device=cuda \
+  --policy.use_amp=false \
+  --policy.optimizer_lr=1e-4 \
+  --policy.optimizer_lr_backbone=0.0 \
+  --policy.dim_model=384 \
+  --policy.dim_feedforward=1024 \
+  --policy.n_encoder_layers=3 \
+  --policy.n_decoder_layers=1 \
+  --policy.dropout=0.1 \
+  --policy.chunk_size=50 \
+  --policy.n_action_steps=20 \
+  --policy.kl_weight=0.1 \
+  --policy.pretrained_backbone_weights=ResNet18_Weights.IMAGENET1K_V1 \
+  --policy.vision_backbone=resnet18 \
+  --policy.replace_final_stride_with_dilation=0 \
+  --optimizer.type=adamw \
+  --optimizer.lr=1e-4 \
+  --optimizer.weight_decay=1e-4 \
+  --optimizer.eps=1e-8 \
+  --optimizer.grad_clip_norm=0.5 \
+  --steps=100000 \
+  --eval_freq=2000 \
+  --save_freq=2000 \
+  --scheduler.type=cosine_decay_with_warmup \
+  --scheduler.num_warmup_steps=5000 \
+  --scheduler.num_decay_steps=95000 \
+  --scheduler.peak_lr=1e-4 \
+  --scheduler.decay_lr=1e-6 \
+  --policy.push_to_hub=false
+    
