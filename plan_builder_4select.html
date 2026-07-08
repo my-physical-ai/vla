@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 학습 구축 계획서 작성 도구 - 4대 선택</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--blue:#2563EB;--blue-l:#DBEAFE;--blue-d:#1E3A8A;
+--green:#059669;--green-l:#D1FAE5;
+--purple:#7C3AED;--purple-l:#EDE9FE;
+--orange:#D97706;--orange-l:#FEF3C7;
+--red:#DC2626;--red-l:#FEE2E2;
+--surface:#F8FAFC;--card:#fff;--ink:#1E293B;--muted:#64748B;--line:#E2E8F0;
+}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--surface);line-height:1.7}
+code{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:860px;margin:0 auto;padding:0 1.2rem 5rem}
+
+/* 헤더 */
+.hero{background:linear-gradient(135deg,#1E3A8A,#0f172a 60%,#0891B2);color:#fff;border-radius:0 0 26px 26px;padding:2.6rem 1.6rem 2.2rem;margin-bottom:1.8rem;text-align:center}
+.hero .tags{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:.3rem .85rem;border-radius:999px;font-size:.78rem}
+.hero h1{font-size:1.9rem;font-weight:900;letter-spacing:-.01em}
+.hero p{font-size:.95rem;opacity:.9;margin-top:.4rem}
+.hero .four{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem}
+.four span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.45rem .8rem;font-size:.82rem;font-weight:700}
+
+/* 섹션 (아코디언) */
+.sec{background:var(--card);border:2px solid var(--line);border-radius:20px;margin-bottom:1.2rem;overflow:hidden;transition:border-color .2s}
+.sec.open{border-color:var(--acc)}
+.sec.c1{--acc:var(--blue);--acc-l:var(--blue-l)}
+.sec.c2{--acc:var(--green);--acc-l:var(--green-l)}
+.sec.c3{--acc:var(--purple);--acc-l:var(--purple-l)}
+.sec.c4{--acc:var(--orange);--acc-l:var(--orange-l)}
+
+/* 헤더 = 선택 버튼 */
+.sec-head{width:100%;padding:1.15rem 1.4rem;display:flex;align-items:center;gap:.9rem;color:#fff;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:filter .15s}
+.sec-head:hover{filter:brightness(1.06)}
+.sec.c1 .sec-head{background:linear-gradient(135deg,#1E3A8A,#3B82F6)}
+.sec.c2 .sec-head{background:linear-gradient(135deg,#064E3B,#10B981)}
+.sec.c3 .sec-head{background:linear-gradient(135deg,#4C1D95,#8B5CF6)}
+.sec.c4 .sec-head{background:linear-gradient(135deg,#78350F,#F59E0B)}
+.sec-head .no{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0}
+.sec-head .ht h2{font-size:1.2rem;font-weight:900}
+.sec-head .ht .sd{font-size:.78rem;opacity:.9;font-weight:400}
+.sec-head .right{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.count-badge{background:rgba(255,255,255,.2);border-radius:999px;padding:.28rem .85rem;font-size:.82rem;font-weight:800;white-space:nowrap}
+.chev{font-size:1rem;background:rgba(255,255,255,.25);border-radius:10px;padding:.35rem .8rem;font-weight:800;white-space:nowrap;transition:.2s}
+.sec.open .chev .arrow{display:inline-block;transform:rotate(180deg)}
+.chev .arrow{display:inline-block;transition:.25s}
+
+/* 접힘 본문 */
+.sec-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.sec.open .sec-body{max-height:4000px}
+.sec-inner{padding:1.4rem 1.5rem 1.6rem}
+.sec-tip{font-size:.86rem;color:var(--muted);margin-bottom:1rem}
+.sec-tip b{color:var(--ink)}
+
+/* 옵션 카드 */
+.opts{display:grid;grid-template-columns:1fr;gap:.55rem}
+@media(min-width:640px){.opts{grid-template-columns:1fr 1fr}}
+.opt{display:flex;gap:.7rem;align-items:flex-start;border:2px solid var(--line);border-radius:14px;padding:.75rem .9rem;cursor:pointer;transition:.15s;background:#fff;user-select:none}
+.opt:hover{border-color:#cbd5e1}
+.opt .chk{width:24px;height:24px;border-radius:8px;border:2.5px solid #cbd5e1;flex-shrink:0;margin-top:.15rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:.85rem;transition:.15s}
+.opt .oi{font-size:1.3rem;flex-shrink:0}
+.opt .ot{font-weight:700;font-size:.95rem}
+.opt .od{font-size:.79rem;color:var(--muted);line-height:1.55;margin-top:.1rem}
+.opt .must{display:inline-block;background:var(--red-l);color:var(--red);font-size:.66rem;font-weight:800;padding:.1rem .45rem;border-radius:6px;margin-left:.35rem;vertical-align:middle}
+.opt.sel{border-color:var(--acc);background:var(--acc-l)}
+.opt.sel .chk{background:var(--acc);border-color:var(--acc)}
+
+/* 선택 결과 리스트 */
+.result{margin-top:1.2rem;border-top:2px dashed var(--line);padding-top:1rem}
+.result-h{font-size:.85rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem;letter-spacing:.03em}
+.rlist{display:flex;flex-direction:column;gap:.45rem}
+.rlist:empty::after{content:"위에서 항목을 선택하면 여기에 쌓입니다";color:#cbd5e1;font-size:.85rem;padding:.6rem 0;text-align:center;display:block}
+.ritem{display:flex;align-items:center;gap:.7rem;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:.55rem .8rem;animation:slide .25s ease}
+@keyframes slide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ritem .rn{width:26px;height:26px;border-radius:50%;color:#fff;background:var(--acc);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0}
+.ritem .rt{font-size:.9rem;font-weight:600;flex:1}
+.ritem .rt small{color:var(--muted);font-weight:400}
+.ritem .rx{border:none;background:var(--red-l);color:var(--red);border-radius:8px;width:28px;height:28px;font-weight:900;cursor:pointer;flex-shrink:0}
+/* 횟수 스테퍼 */
+.rstep{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.rstep button{width:28px;height:28px;border-radius:8px;border:none;color:#fff;font-weight:900;cursor:pointer;font-size:1rem}
+.rstep .mi{background:#94a3b8}
+.rstep .pl{background:var(--green)}
+.rstep .vv{font-family:'JetBrains Mono';font-weight:700;min-width:38px;text-align:center;font-size:.92rem}
+.rstep .vv small{font-size:.7rem;color:var(--muted)}
+.space-sum{margin-top:.8rem;background:var(--green-l);border:2px solid var(--green);border-radius:12px;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:.92rem;flex-wrap:wrap;gap:.3rem}
+.space-sum .ok{color:var(--green)}
+.space-sum .no2{color:var(--orange)}
+
+/* 작업 공간 시각 그리드 */
+.ws-frame{background:linear-gradient(180deg,#F0FDF4,#fff);border:3px solid var(--green);border-radius:18px;padding:1.2rem 1.2rem 1rem;text-align:center}
+.ws-title{font-size:.82rem;font-weight:800;color:var(--green);margin-bottom:.7rem;letter-spacing:.03em}
+.ws-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;max-width:420px;margin:0 auto}
+.gc{position:relative;aspect-ratio:1.35/1;border:2.5px dashed #A7F3D0;border-radius:14px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;transition:.15s;user-select:none}
+.gc:hover{border-color:var(--green)}
+.gc .gname{font-size:.82rem;font-weight:700;color:var(--muted)}
+.gc .gpin{font-size:1.15rem;opacity:.35}
+.gc .gcnt{display:none;position:absolute;top:-9px;right:-6px;background:var(--green);color:#fff;font-family:'JetBrains Mono';font-size:.72rem;font-weight:700;padding:.12rem .5rem;border-radius:999px;box-shadow:0 2px 6px rgba(5,150,105,.4)}
+.gc.sel{border-style:solid;border-color:var(--green);background:var(--green-l)}
+.gc.sel .gname{color:var(--green)}
+.gc.sel .gpin{opacity:1}
+.gc.sel .gcnt{display:block}
+.ws-axis{display:flex;justify-content:space-between;max-width:420px;margin:.4rem auto 0;font-size:.72rem;color:var(--muted);font-weight:700}
+.ws-robot{margin-top:.7rem;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:.45rem;font-size:.8rem;font-weight:700;max-width:420px;margin-left:auto;margin-right:auto}
+.ws-extra{display:grid;grid-template-columns:1fr;gap:.55rem;margin-top:.8rem}
+@media(min-width:640px){.ws-extra{grid-template-columns:1fr 1fr}}
+
+/* 메모 */
+.memo{margin-top:1rem}
+.memo label{font-size:.85rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
+.memo textarea{width:100%;min-height:74px;border:2px solid var(--line);border-radius:12px;padding:.75rem .9rem;font-size:.9rem;font-family:inherit;resize:vertical;background:#FFFDF5}
+.memo textarea:focus{outline:none;border-color:var(--acc)}
+.memo textarea::placeholder{color:#cbd5e1}
+
+/* 최종 계획서 */
+.final{background:var(--card);border:3px solid var(--blue);border-radius:20px;overflow:hidden;margin-top:2rem}
+.final-head{background:linear-gradient(135deg,#0f172a,#1E3A8A);color:#fff;padding:1.3rem 1.6rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.final-head h2{font-size:1.3rem;font-weight:900}
+.final-head .fh-sub{font-size:.8rem;opacity:.85}
+.final-body{padding:1.5rem 1.6rem}
+.fgrid{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:640px){.fgrid{grid-template-columns:1fr 1fr}}
+.fcard{border:2px solid var(--line);border-radius:14px;padding:1rem 1.1rem}
+.fcard .fc-h{font-size:.82rem;font-weight:800;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.fcard.f1 .fc-h{color:var(--blue)}
+.fcard.f2 .fc-h{color:var(--green)}
+.fcard.f3 .fc-h{color:var(--purple)}
+.fcard.f4 .fc-h{color:var(--orange)}
+.fcard ol,.fcard ul{padding-left:1.2rem;font-size:.86rem}
+.fcard li{padding:.12rem 0}
+.fcard .empty{color:#cbd5e1;font-size:.83rem}
+.fcard .cnt-tag{font-family:'JetBrains Mono';font-size:.78rem;color:var(--green);font-weight:700}
+.fmemo{margin-top:.6rem;padding:.55rem .75rem;background:#FFFDF5;border:1.5px dashed var(--orange);border-radius:10px;font-size:.82rem;color:#78350F;white-space:pre-wrap}
+.fmemo::before{content:"📝 메모: ";font-weight:800}
+.print-row{display:flex;gap:.8rem;margin-top:1.3rem}
+.pbtn{flex:1;border:none;border-radius:14px;padding:.95rem;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;color:#fff;background:var(--blue)}
+.pbtn.reset{background:#fff;color:var(--muted);border:2px solid var(--line);flex:0 0 130px}
+.pbtn:active{transform:scale(.97)}
+
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem 0 0}
+footer strong{color:var(--ink)}
+
+@media print{
+body{background:#fff}
+.hero,.sec,.print-row,footer{display:none!important}
+.final{border-color:#999}
+.wrap{padding-bottom:1rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 헤더 -->
+<div class="hero">
+<div class="tags"><span class="pill">재직자 교육용</span><span class="pill">클릭 선택형</span><span class="pill">접었다 펼치는 구성</span></div>
+<h1>🤖 AI 학습 구축 계획서 작성 도구</h1>
+<p>각 항목의 <b>[선택하기]</b> 버튼을 누르면 아래로 펼쳐집니다. ①→④ 순서로 진행하세요.</p>
+<div class="four">
+<span>① 🎬 행동</span><span>② 🗺️ 공간</span><span>③ 📷 카메라</span><span>④ 💡 조명</span>
+</div>
+</div>
+
+<!-- ① 행동 -->
+<div class="sec c1" id="secAct">
+<button class="sec-head" onclick="toggleSec('secAct')">
+<span class="no">①</span>
+<span class="ht"><h2>🎬 행동 선택</h2><span class="sd">클릭한 순서가 곧 실행 순서 · 필수 2개 포함</span></span>
+<span class="right"><span class="count-badge"><span id="cntAct">0</span>개</span><span class="chev">선택하기 <span class="arrow">▼</span></span></span>
+</button>
+<div class="sec-body"><div class="sec-inner">
+<p class="sec-tip">💡 <b>필수</b> 표시 행동은 반드시 포함하세요. 같은 항목을 다시 누르면 해제됩니다.</p>
+<div class="opts" id="actOpts">
+<div class="opt" data-v="주위를 좌우로 본다" data-i="👀" data-must="1"><span class="chk"></span><span class="oi">👀</span><div><div class="ot">주위를 좌우로 본다<span class="must">필수</span></div><div class="od">집기 전 카메라가 작업 공간을 훑어 물체 위치를 인식할 시간 확보</div></div></div>
+<div class="opt" data-v="물체를 약간만 움직여 본다" data-i="🤏"><span class="chk"></span><span class="oi">🤏</span><div><div class="ot">물체를 약간만 움직여 본다</div><div class="od">살짝 건드려 위치·무게 감각을 확인하는 탐색 동작</div></div></div>
+<div class="opt" data-v="천천히 접근한다" data-i="🐢"><span class="chk"></span><span class="oi">🐢</span><div><div class="ot">천천히 접근한다</div><div class="od">그리퍼를 물체 상공으로 흔들림 없이 이동</div></div></div>
+<div class="opt" data-v="파지 직전 잠깐 멈춘다" data-i="✋" data-must="1"><span class="chk"></span><span class="oi">✋</span><div><div class="ot">파지 직전 잠깐 멈춘다<span class="must">필수</span></div><div class="od">0.5~1초 정지 — "잡는 시점"을 모델이 또렷이 학습</div></div></div>
+<div class="opt" data-v="물체를 집는다" data-i="🦾"><span class="chk"></span><span class="oi">🦾</span><div><div class="ot">물체를 집는다</div><div class="od">그리퍼를 닫아 확실히 파지</div></div></div>
+<div class="opt" data-v="집은 상태를 잠깐 유지한다" data-i="⏸️"><span class="chk"></span><span class="oi">⏸️</span><div><div class="ot">집은 상태를 잠깐 유지한다</div><div class="od">들어올리기 전 파지 안정성 확인</div></div></div>
+<div class="opt" data-v="목표 위치로 옮긴다" data-i="🚚"><span class="chk"></span><span class="oi">🚚</span><div><div class="ot">목표 위치로 옮긴다</div><div class="od">파지 유지하며 상자/받침 위로 이동</div></div></div>
+<div class="opt" data-v="천천히 내려놓는다" data-i="🪺"><span class="chk"></span><span class="oi">🪺</span><div><div class="ot">천천히 내려놓는다</div><div class="od">그리퍼를 열어 목표 지점에 안착</div></div></div>
+<div class="opt" data-v="놓친 경우 다시 집는다" data-i="🔄"><span class="chk"></span><span class="oi">🔄</span><div><div class="ot">놓친 경우 다시 집는다</div><div class="od">실패→복구 장면 — 모델의 회복 능력을 키우는 귀중한 데이터</div></div></div>
+<div class="opt" data-v="초기 자세로 복귀한다" data-i="🏠"><span class="chk"></span><span class="oi">🏠</span><div><div class="ot">초기 자세로 복귀한다</div><div class="od">복귀 완료 = 한 에피소드 종료</div></div></div>
+</div>
+<div class="result">
+<div class="result-h">✅ 선택된 행동 순서</div>
+<div class="rlist" id="actList"></div>
+</div>
+<div class="memo">
+<label>📝 행동 메모 (수기 작성)</label>
+<textarea id="memoAct" placeholder="예: 3번 행동은 특히 천천히. 놓친 경우 재파지는 20회 중 3회만 포함." oninput="renderFinal()"></textarea>
+</div>
+</div></div>
+</div>
+
+<!-- ② 공간 -->
+<div class="sec c2" id="secSpace">
+<button class="sec-head" onclick="toggleSec('secSpace')">
+<span class="no">②</span>
+<span class="ht"><h2>🗺️ 공간 선택</h2><span class="sd">구역 선택 후 리스트에서 횟수 조절 · 권장 합계 20회</span></span>
+<span class="right"><span class="count-badge"><span id="cntSpace">0</span>회</span><span class="chev">선택하기 <span class="arrow">▼</span></span></span>
+</button>
+<div class="sec-body"><div class="sec-inner">
+<p class="sec-tip">💡 아래는 <b>작업대를 위에서 내려다본 그림</b>입니다. 물체를 놓을 구역을 직접 눌러 선택하세요. 권장: <b>9구역 × 2회 + 보정 2회 = 20회</b>. 횟수는 아래 리스트에서 ➕➖로 조절합니다.</p>
+<div id="spaceOpts">
+<div class="ws-frame">
+<div class="ws-title">🗺️ 작업 공간 (위에서 본 모습) — 구역을 눌러 선택</div>
+<div class="ws-grid">
+<div class="opt gc" data-v="왼쪽 · 위 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">왼쪽 · 위</span></div>
+<div class="opt gc" data-v="가운데 · 위 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">가운데 · 위</span></div>
+<div class="opt gc" data-v="오른쪽 · 위 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">오른쪽 · 위</span></div>
+<div class="opt gc" data-v="왼쪽 · 중간 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">왼쪽 · 중간</span></div>
+<div class="opt gc" data-v="정중앙 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">정중앙</span></div>
+<div class="opt gc" data-v="오른쪽 · 중간 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">오른쪽 · 중간</span></div>
+<div class="opt gc" data-v="왼쪽 · 아래 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">왼쪽 · 아래</span></div>
+<div class="opt gc" data-v="가운데 · 아래 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">가운데 · 아래</span></div>
+<div class="opt gc" data-v="오른쪽 · 아래 구역" data-i="📍" data-def="2"><span class="gcnt"></span><span class="gpin">📍</span><span class="gname">오른쪽 · 아래</span></div>
+</div>
+<div class="ws-axis"><span>◀ 가로: 왼쪽</span><span>가로: 오른쪽 ▶</span></div>
+<div class="ws-robot">🦾 로봇 팔은 이쪽(아래)에 있습니다 — 위 = 로봇에서 먼 쪽</div>
+</div>
+<div class="ws-extra">
+<div class="opt" data-v="보정(+1) 어려웠던 자리 한 번 더" data-i="🎁" data-def="2"><span class="chk"></span><span class="oi">🎁</span><div><div class="ot">보정 +1</div><div class="od">경계 위치나 실패가 잦았던 자리를 추가로 — 권장 2회</div></div></div>
+<div class="opt" data-v="물체 방향 회전 배치" data-i="🔄" data-def="2"><span class="chk"></span><span class="oi">🔄</span><div><div class="ot">물체 방향 회전 배치</div><div class="od">같은 구역이라도 물체를 90°/180° 돌려 배치 — 심화용</div></div></div>
+</div>
+</div>
+<div class="result">
+<div class="result-h">✅ 선택된 공간 & 횟수</div>
+<div class="rlist" id="spaceList"></div>
+<div class="space-sum" id="spaceSum" style="display:none"></div>
+</div>
+<div class="memo">
+<label>📝 공간 메모 (수기 작성)</label>
+<textarea id="memoSpace" placeholder="예: 작업대 45×30cm, 테이프로 3×3 격자 표시. 보정 +1은 왼쪽-위 경계에 배정." oninput="renderFinal()"></textarea>
+</div>
+</div></div>
+</div>
+
+<!-- ③ 카메라 -->
+<div class="sec c3" id="secCam">
+<button class="sec-head" onclick="toggleSec('secCam')">
+<span class="no">③</span>
+<span class="ht"><h2>📷 카메라 선택</h2><span class="sd">탑 카메라의 구도만 조정 가능 · 손목 카메라는 고정</span></span>
+<span class="right"><span class="count-badge"><span id="cntCam">0</span>개</span><span class="chev">선택하기 <span class="arrow">▼</span></span></span>
+</button>
+<div class="sec-body"><div class="sec-inner">
+<p class="sec-tip">💡 손목 카메라는 그리퍼에 고정되어 바꿀 수 없습니다. <b>바꿀 수 있는 것은 탑(위) 카메라의 구도</b>뿐입니다. 이번 수집에서 쓸 탑 카메라 구도를 선택하세요.</p>
+<div class="opts" id="camOpts">
+<div class="opt" data-v="탑 카메라 - 객체와 가까이" data-i="🔍"><span class="chk"></span><span class="oi">🔍</span><div><div class="ot">객체와 가까이</div><div class="od">탑 카메라를 낮춰 물체를 크게 — 세밀한 파지 장면이 잘 보임</div></div></div>
+<div class="opt" data-v="탑 카메라 - 객체와 멀리" data-i="🛰️"><span class="chk"></span><span class="oi">🛰️</span><div><div class="ot">객체와 멀리</div><div class="od">탑 카메라를 높여 여유 있게 — 물체 주변 상황까지 함께 담김</div></div></div>
+<div class="opt" data-v="탑 카메라 - 전체 구도 넓게" data-i="🖼️"><span class="chk"></span><span class="oi">🖼️</span><div><div class="ot">전체 구도 넓게</div><div class="od">작업대 전체 + 상자까지 한 화면에 — 출발과 목표가 모두 보임</div></div></div>
+<div class="opt" data-v="탑 카메라 - 전체 구도 좁게" data-i="🎯"><span class="chk"></span><span class="oi">🎯</span><div><div class="ot">전체 구도 좁게</div><div class="od">물체가 놓이는 핵심 영역만 — 배경 방해 요소 최소화</div></div></div>
+<div class="opt" data-v="탑 카메라 - 측면 왼쪽으로 치우침" data-i="↖️"><span class="chk"></span><span class="oi">↖️</span><div><div class="ot">측면 · 왼쪽 치우침</div><div class="od">탑 카메라를 왼쪽으로 옮겨 비스듬히 — 왼쪽 구역이 잘 보임</div></div></div>
+<div class="opt" data-v="탑 카메라 - 측면 오른쪽으로 치우침" data-i="↗️"><span class="chk"></span><span class="oi">↗️</span><div><div class="ot">측면 · 오른쪽 치우침</div><div class="od">탑 카메라를 오른쪽으로 옮겨 비스듬히 — 오른쪽 구역이 잘 보임</div></div></div>
+</div>
+<div class="result">
+<div class="result-h">✅ 선택된 탑 카메라 구도</div>
+<div class="rlist" id="camList"></div>
+</div>
+<div class="memo">
+<label>📝 카메라 메모 (수기 작성)</label>
+<textarea id="memoCam" placeholder="예: 탑 카메라 높이 55cm, 각도 살짝 앞으로. 학습과 추론에서 반드시 같은 구도 유지!" oninput="renderFinal()"></textarea>
+</div>
+</div></div>
+</div>
+
+<!-- ④ 조명 -->
+<div class="sec c4" id="secLight">
+<button class="sec-head" onclick="toggleSec('secLight')">
+<span class="no">④</span>
+<span class="ht"><h2>💡 조명 선택</h2><span class="sd">수집할 시간대를 선택 · 복수 선택 가능</span></span>
+<span class="right"><span class="count-badge"><span id="cntLight">0</span>개</span><span class="chev">선택하기 <span class="arrow">▼</span></span></span>
+</button>
+<div class="sec-body"><div class="sec-inner">
+<p class="sec-tip">💡 조명은 시간대에 따라 실제로 달라집니다. <b>한 시간대로만</b> 모으면 다른 시간대에 성능이 떨어질 수 있어요. 추론(시연)할 시간대를 반드시 포함하세요.</p>
+<div class="opts" id="lightOpts">
+<div class="opt" data-v="아침 (자연광이 낮게 들어옴)" data-i="🌅"><span class="chk"></span><span class="oi">🌅</span><div><div class="ot">아침</div><div class="od">창문으로 햇빛이 낮게 들어와 그림자가 길어짐 · 색이 따뜻하게 보임</div></div></div>
+<div class="opt" data-v="점심 (가장 밝고 균일함)" data-i="☀️"><span class="chk"></span><span class="oi">☀️</span><div><div class="ot">점심</div><div class="od">햇빛+실내등이 가장 밝고 균일 · 기본 수집에 가장 무난한 조건</div></div></div>
+<div class="opt" data-v="밤 (실내등만, 그림자 진함)" data-i="🌙"><span class="chk"></span><span class="oi">🌙</span><div><div class="ot">밤</div><div class="od">실내등만 켜진 상태 · 전체적으로 어둡고 그림자가 진함 · 색이 노랗게 보임</div></div></div>
+</div>
+<div class="result">
+<div class="result-h">✅ 선택된 조명(시간대) 조건</div>
+<div class="rlist" id="lightList"></div>
+</div>
+<div class="memo">
+<label>📝 조명 메모 (수기 작성)</label>
+<textarea id="memoLight" placeholder="예: 발표 시연이 오후 2시 → 점심 조건 비중 높게. 밤 수집 시 커튼 닫고 실내등 2개 모두 켜기." oninput="renderFinal()"></textarea>
+</div>
+</div></div>
+</div>
+
+<!-- 최종 계획서 -->
+<div class="final" id="finalDoc">
+<div class="final-head">
+<h2>📄 자동 완성 계획서</h2>
+<span class="fh-sub">위 선택과 메모가 실시간으로 반영됩니다</span>
+</div>
+<div class="final-body">
+<div class="fgrid">
+<div class="fcard f1"><div class="fc-h">🎬 행동 순서</div><ol id="fAct"><li class="empty">아직 선택 없음</li></ol><div class="fmemo" id="fmAct" style="display:none"></div></div>
+<div class="fcard f2"><div class="fc-h">🗺️ 공간 & 횟수 <span id="fSpaceTotal" style="margin-left:auto"></span></div><ul id="fSpace"><li class="empty">아직 선택 없음</li></ul><div class="fmemo" id="fmSpace" style="display:none"></div></div>
+<div class="fcard f3"><div class="fc-h">📷 탑 카메라 구도</div><ul id="fCam"><li class="empty">아직 선택 없음</li></ul><div class="fmemo" id="fmCam" style="display:none"></div></div>
+<div class="fcard f4"><div class="fc-h">💡 조명(시간대)</div><ul id="fLight"><li class="empty">아직 선택 없음</li></ul><div class="fmemo" id="fmLight" style="display:none"></div></div>
+</div>
+<div class="print-row">
+<button class="pbtn reset" onclick="resetAll()">↺ 초기화</button>
+<button class="pbtn" onclick="window.print()">🖨️ 계획서 인쇄하기</button>
+</div>
+</div>
+</div>
+
+<footer><strong>ZETA Satellite Robotics</strong> · Physical AI Education Program · 4대 선택형 계획서 도구</footer>
+</div>
+
+<script>
+const state={act:[],space:[],cam:[],light:[]};
+const cfg={
+act:{opts:'actOpts',list:'actList',cnt:'cntAct',final:'fAct',memo:'memoAct',fmemo:'fmAct',ordered:true,count:false},
+space:{opts:'spaceOpts',list:'spaceList',cnt:'cntSpace',final:'fSpace',memo:'memoSpace',fmemo:'fmSpace',ordered:false,count:true},
+cam:{opts:'camOpts',list:'camList',cnt:'cntCam',final:'fCam',memo:'memoCam',fmemo:'fmCam',ordered:false,count:false},
+light:{opts:'lightOpts',list:'lightList',cnt:'cntLight',final:'fLight',memo:'memoLight',fmemo:'fmLight',ordered:false,count:false}
+};
+
+/* 아코디언 열기/닫기 */
+function toggleSec(id){
+document.getElementById(id).classList.toggle('open');
+}
+
+/* 옵션 클릭 */
+Object.keys(cfg).forEach(cat=>{
+document.querySelectorAll('#'+cfg[cat].opts+' .opt').forEach(el=>{
+el.addEventListener('click',()=>{
+const v=el.dataset.v;
+const idx=state[cat].findIndex(x=>x.v===v);
+if(idx>=0)state[cat].splice(idx,1);
+else state[cat].push({v,icon:el.dataset.i||'✔️',must:!!el.dataset.must,n:+(el.dataset.def||1)});
+render(cat);
+});
+});
+});
+
+/* 렌더 */
+function render(cat){
+const c=cfg[cat];
+document.querySelectorAll('#'+c.opts+' .opt').forEach(el=>{
+const item=state[cat].find(x=>x.v===el.dataset.v);
+el.classList.toggle('sel',!!item);
+const chk=el.querySelector('.chk');
+if(chk)chk.textContent=item?'✓':'';
+const gcnt=el.querySelector('.gcnt');
+if(gcnt)gcnt.textContent=item?item.n+'회':'';
+});
+const list=document.getElementById(c.list);
+list.innerHTML='';
+state[cat].forEach((item,i)=>{
+const row=document.createElement('div');
+row.className='ritem';
+let inner=`<span class="rn">${c.ordered?i+1:'✓'}</span><span class="rt">${item.icon} ${item.v}${item.must?' <small>(필수)</small>':''}</span>`;
+if(c.count){
+inner+=`<span class="rstep"><button class="mi" onclick="chg('${cat}',${i},-1)">−</button><span class="vv">${item.n}<small>회</small></span><button class="pl" onclick="chg('${cat}',${i},1)">＋</button></span>`;
+}
+inner+=`<button class="rx" onclick="rm('${cat}',${i})">✕</button>`;
+row.innerHTML=inner;
+list.appendChild(row);
+});
+if(c.count){
+const tot=state[cat].reduce((a,x)=>a+x.n,0);
+document.getElementById(c.cnt).textContent=tot;
+const sum=document.getElementById('spaceSum');
+if(state[cat].length){
+sum.style.display='flex';
+const msg=tot===20?'<span class="ok">🎉 딱 20회! 권장 배분과 일치합니다</span>':(tot>20?'<span class="no2">권장 20회보다 '+(tot-20)+'회 많습니다 (사유가 있다면 OK)</span>':'<span class="no2">권장 20회까지 '+(20-tot)+'회 남았습니다</span>');
+sum.innerHTML=`<span>한 단계 합계 ${tot}회</span><span>${msg}</span>`;
+}else sum.style.display='none';
+}else{
+document.getElementById(c.cnt).textContent=state[cat].length;
+}
+renderFinal();
+}
+function chg(cat,i,d){
+state[cat][i].n=Math.max(1,Math.min(9,state[cat][i].n+d));
+render(cat);
+}
+function rm(cat,i){state[cat].splice(i,1);render(cat);}
+
+/* 최종 계획서 */
+function renderFinal(){
+Object.keys(cfg).forEach(cat=>{
+const c=cfg[cat];
+const box=document.getElementById(c.final);
+if(!state[cat].length)box.innerHTML='<li class="empty">아직 선택 없음</li>';
+else box.innerHTML=state[cat].map(x=>{
+let t=`${x.icon} ${x.v}`;
+if(x.must)t+=' ⭐';
+if(c.count)t+=` <span class="cnt-tag">${x.n}회</span>`;
+return `<li>${t}</li>`;
+}).join('');
+/* 메모 반영 */
+const m=document.getElementById(c.memo).value.trim();
+const fm=document.getElementById(c.fmemo);
+if(m){fm.style.display='block';fm.textContent=m;}
+else fm.style.display='none';
+});
+const tot=state.space.reduce((a,x)=>a+x.n,0);
+document.getElementById('fSpaceTotal').innerHTML=tot?`<span class="cnt-tag">합계 ${tot}회</span>`:'';
+}
+
+function resetAll(){
+if(!confirm('모든 선택과 메모를 지우고 처음부터 시작할까요?'))return;
+Object.keys(state).forEach(k=>state[k]=[]);
+Object.keys(cfg).forEach(cat=>{document.getElementById(cfg[cat].memo).value='';render(cat);});
+document.querySelectorAll('.sec').forEach(s=>s.classList.remove('open'));
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* 첫 번째 섹션만 기본으로 열어둠 */
+document.getElementById('secAct').classList.add('open');
+</script>
+</body>
+</html>
