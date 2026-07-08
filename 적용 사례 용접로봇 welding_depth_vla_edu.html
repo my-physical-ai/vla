@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>용접로봇과 뎁스 AI — 심 감지부터 뎁스 VLA 전환 전략까지</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Hahmlet:wght@300;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --primary:#2563EB; --primary-l:#DBEAFE;
+      --purple:#7C3AED;  --purple-l:#EDE9FE;
+      --green:#059669;   --green-l:#D1FAE5;
+      --orange:#D97706;  --orange-l:#FEF3C7;
+      --red:#DC2626;     --red-l:#FEE2E2;
+      --teal:#0891B2;    --teal-l:#CFFAFE;
+      --surface:#F8FAFC; --card:#FFFFFF;
+      --text:#1E293B; --muted:#64748B; --dim:#94A3B8; --border:#E2E8F0;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--surface); color:var(--text); line-height:1.75; }
+    .wrap { max-width:920px; margin:0 auto; padding:0 1.5rem; }
+    section { padding:3.5rem 0; }
+    p { font-size:0.93rem; line-height:1.82; margin-bottom:0.9rem; }
+    p:last-child { margin-bottom:0; }
+    code { font-family:'JetBrains Mono',monospace; font-size:0.83rem; background:var(--primary-l); color:var(--primary); padding:0.1rem 0.45rem; border-radius:4px; }
+
+    /* ── HERO ── */
+    .hero { background:linear-gradient(135deg,#78350F,#F59E0B); color:white; padding:4.5rem 0 4rem; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.12) 1.5px, transparent 1.5px); background-size:28px 28px; }
+    .hero .wrap { position:relative; z-index:1; }
+    .hero-chip { display:inline-block; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:0.35rem 1.1rem; font-size:0.76rem; font-weight:700; letter-spacing:0.07em; margin-bottom:1.5rem; }
+    .hero h1 { font-family:'Hahmlet',serif; font-size:clamp(1.9rem,4.5vw,2.9rem); font-weight:900; line-height:1.2; margin-bottom:1rem; }
+    .hero-sub { font-size:1rem; opacity:0.9; max-width:640px; line-height:1.7; margin-bottom:1.5rem; }
+    .hero-tags { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .hero-tag { background:rgba(255,255,255,0.15); border-radius:8px; padding:0.3rem 0.85rem; font-size:0.78rem; font-weight:600; }
+
+    /* ── BADGES & TITLES ── */
+    .badge { display:inline-block; border-radius:999px; padding:0.25rem 0.9rem; font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem; }
+    .b-blue{background:var(--primary-l);color:var(--primary);} .b-purple{background:var(--purple-l);color:var(--purple);}
+    .b-green{background:var(--green-l);color:var(--green);} .b-orange{background:var(--orange-l);color:var(--orange);}
+    .b-red{background:var(--red-l);color:var(--red);} .b-teal{background:var(--teal-l);color:var(--teal);}
+    .sec-title { font-family:'Hahmlet',serif; font-size:clamp(1.4rem,3vw,1.85rem); font-weight:900; line-height:1.3; margin-bottom:0.6rem; }
+    .sec-desc { color:var(--muted); font-size:0.93rem; max-width:700px; margin-bottom:2rem; }
+    .sec-alt { background:white; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+    /* ── ANALOGY BOX ── */
+    .analogy { display:flex; gap:1rem; background:var(--orange-l); border-radius:14px; padding:1.4rem 1.5rem; margin:1.25rem 0; align-items:flex-start; }
+    .analogy.a-blue { background:var(--primary-l); }
+    .analogy.a-purple { background:var(--purple-l); }
+    .analogy.a-green { background:var(--green-l); }
+    .analogy-ico { font-size:2rem; flex-shrink:0; }
+    .analogy-title { font-weight:900; font-size:0.9rem; margin-bottom:0.3rem; }
+    .analogy-text { font-size:0.89rem; line-height:1.7; }
+
+    /* ── DIAGRAM BOX ── */
+    .diagram-box { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:1.5rem; margin:1.5rem 0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.07); overflow-x:auto; }
+    .diagram-box svg { display:block; margin:0 auto; max-width:100%; height:auto; }
+    .diagram-caption { text-align:center; font-size:0.8rem; color:var(--muted); margin-top:0.75rem; }
+
+    /* ── COMPARE CARDS ── */
+    .cmp-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.25rem; margin:1.5rem 0; }
+    .cmp-card { background:var(--card); border-radius:14px; padding:1.5rem; border:1px solid var(--border); border-top:4px solid var(--cc,var(--primary)); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .cmp-title { font-weight:900; font-size:0.95rem; margin-bottom:0.6rem; color:var(--cc,var(--primary)); }
+    .cmp-list { list-style:none; }
+    .cmp-list li { font-size:0.85rem; padding:0.4rem 0; border-bottom:1px dashed var(--border); display:flex; gap:0.5rem; line-height:1.6; }
+    .cmp-list li:last-child { border-bottom:none; }
+
+    /* ── STAT CARDS ── */
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin:1.5rem 0; }
+    .stat-card { background:var(--card); border-radius:12px; padding:1.25rem 1rem; text-align:center; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .sn { font-family:'Hahmlet',serif; font-size:1.9rem; font-weight:900; color:var(--sc,var(--primary)); line-height:1; }
+    .sl { font-weight:700; font-size:0.8rem; margin-top:0.45rem; }
+    .sd { font-size:0.73rem; color:var(--muted); margin-top:0.2rem; }
+
+    /* ── CALLOUT ── */
+    .co { display:flex; gap:0.75rem; padding:1rem 1.25rem; border-radius:10px; align-items:flex-start; font-size:0.9rem; line-height:1.68; margin:1.25rem 0; }
+    .co-ico { font-size:1.2rem; flex-shrink:0; padding-top:0.1rem; }
+    .co-tip{background:var(--green-l);border-left:3px solid var(--green);}
+    .co-warn{background:var(--orange-l);border-left:3px solid var(--orange);}
+    .co-key{background:var(--primary-l);border-left:3px solid var(--primary);}
+    .co-red{background:var(--red-l);border-left:3px solid var(--red);}
+    .co-purple{background:var(--purple-l);border-left:3px solid var(--purple);}
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x:auto; margin:1.5rem 0; }
+    .tbl { width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .tbl th { background:#EFF6FF; color:var(--primary); padding:0.85rem 1rem; text-align:left; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+    .tbl td { padding:0.8rem 1rem; border-bottom:1px solid var(--border); font-size:0.86rem; vertical-align:top; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .t-good{color:var(--green);font-weight:700;} .t-bad{color:var(--red);font-weight:700;}
+    .t-mid{color:var(--orange);font-weight:700;} .t-dim{color:var(--dim);}
+
+    /* ── ROADMAP ── */
+    .rm-step { display:grid; grid-template-columns:70px 1fr; gap:1rem; padding:1.35rem 0; border-bottom:1px dashed var(--border); align-items:start; }
+    .rm-step:last-child { border-bottom:none; }
+    .rm-num { font-family:'Hahmlet',serif; font-size:1.9rem; font-weight:900; color:var(--rc,var(--purple)); opacity:0.35; line-height:1; text-align:center; }
+    .rm-title { font-weight:700; font-size:0.96rem; margin-bottom:0.3rem; }
+    .rm-desc { font-size:0.87rem; color:var(--muted); line-height:1.68; }
+
+    /* ── ACCORDION ── */
+    .acc { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:0.75rem; background:var(--card); }
+    .acc-hd { display:flex; justify-content:space-between; align-items:center; padding:0.95rem 1.25rem; cursor:pointer; font-weight:700; font-size:0.9rem; background:var(--card); user-select:none; }
+    .acc-bd { max-height:0; overflow:hidden; transition:max-height 0.4s ease,padding 0.3s; padding:0 1.25rem; }
+    .acc-tog:checked ~ .acc-bd { max-height:4000px; padding:0 1.25rem 1.25rem; }
+    .acc-tog:checked ~ .acc-hd .acc-chev { transform:rotate(90deg); }
+    .acc-chev { transition:transform 0.2s; color:var(--dim); }
+
+    /* ── CODE ── */
+    .codeblock { background:#0F172A; border-radius:12px; padding:1.4rem; font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.85; overflow-x:auto; margin:1rem 0; color:#CBD5E1; }
+    .ck{color:#FB923C;} .cf{color:#C4B5FD;} .cs{color:#FDE047;} .cc{color:#64748B;font-style:italic;}
+
+    /* ── SUMMARY ── */
+    .summary { background:linear-gradient(135deg,#78350F,#B45309); border-radius:16px; padding:2.5rem; color:white; margin:2rem 0; }
+    .summary h3 { font-family:'Hahmlet',serif; font-size:1.3rem; font-weight:900; margin-bottom:1.25rem; }
+    .sum-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:0.75rem; }
+    .sum-item { display:flex; gap:0.6rem; align-items:flex-start; background:rgba(255,255,255,0.1); border-radius:10px; padding:0.9rem; font-size:0.86rem; line-height:1.6; }
+
+    @media(max-width:768px){ .rm-step { grid-template-columns:50px 1fr; } }
+    @media print {
+      .hero { background:white!important; color:black!important; }
+      .summary { background:white!important; color:black!important; border:2px solid var(--orange); }
+      .acc-bd { max-height:none!important; padding:0 1.25rem 1.25rem!important; }
+      .codeblock { background:#f5f5f5; color:#333; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════ HERO ══════ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-chip">🔥 ZETA Physical AI 교육 시리즈 · 용접로봇 × 뎁스 AI 편</div>
+    <h1>용접로봇과 뎁스(Depth) AI<br>— 심 감지부터 뎁스 VLA 전환 전략까지</h1>
+    <p class="hero-sub">
+      "심(Seam)이 뭐죠?"라는 질문에서 시작해, 레이저비전의 원리, YOLO 학습법,
+      카트형 용접로봇 설계, 그리고 "RGB VLA vs 뎁스 정책" 실측 데이터까지 —
+      하나의 흐름으로 정리한 교육자료입니다.
+    </p>
+    <div class="hero-tags">
+      <span class="hero-tag"># 심(Seam) 감지</span>
+      <span class="hero-tag"># 레이저비전</span>
+      <span class="hero-tag"># 카트형 용접로봇</span>
+      <span class="hero-tag"># RGB vs 뎁스 VLA</span>
+      <span class="hero-tag"># DP3 벤치마크</span>
+      <span class="hero-tag"># PointVLA</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════ 전체 지도 ══════ -->
+<section>
+  <div class="wrap">
+    <span class="badge b-blue">전체 지도</span>
+    <h2 class="sec-title">이 자료의 학습 흐름 — 5개 질문의 연결</h2>
+    <p class="sec-desc">실제 수업 중 오간 질문 순서 그대로입니다. 하나의 질문이 다음 질문을 낳는 흐름을 따라가 보세요.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <rect x="15" y="45" width="150" height="105" rx="12" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/>
+        <text x="90" y="76" font-size="20" text-anchor="middle">❓</text>
+        <text x="90" y="100" font-size="12.5" font-weight="900" text-anchor="middle" fill="#1D4ED8">Q1. 심이 뭐지?</text>
+        <text x="90" y="120" font-size="10.5" text-anchor="middle" fill="#475569">레이저비전?</text>
+        <text x="90" y="136" font-size="10.5" text-anchor="middle" fill="#475569">YOLO 심 감지?</text>
+
+        <path d="M 172 97 L 195 97" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#ar)"/>
+
+        <rect x="200" y="45" width="150" height="105" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+        <text x="275" y="76" font-size="20" text-anchor="middle">🛒</text>
+        <text x="275" y="100" font-size="12.5" font-weight="900" text-anchor="middle" fill="#B45309">Q2. 카트형 설계</text>
+        <text x="275" y="120" font-size="10.5" text-anchor="middle" fill="#475569">사람이 밀고, 고정 후</text>
+        <text x="275" y="136" font-size="10.5" text-anchor="middle" fill="#475569">ACT→VLA 전환?</text>
+
+        <path d="M 357 97 L 380 97" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#ar)"/>
+
+        <rect x="385" y="45" width="150" height="105" rx="12" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+        <text x="460" y="76" font-size="20" text-anchor="middle">🤔</text>
+        <text x="460" y="100" font-size="12.5" font-weight="900" text-anchor="middle" fill="#6D28D9">Q3. 뎁스는 어디에?</text>
+        <text x="460" y="120" font-size="10.5" text-anchor="middle" fill="#475569">용접로봇도, Pi0도</text>
+        <text x="460" y="136" font-size="10.5" text-anchor="middle" fill="#475569">뎁스가 없나?</text>
+
+        <path d="M 542 97 L 565 97" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#ar)"/>
+
+        <rect x="570" y="45" width="130" height="105" rx="12" fill="#D1FAE5" stroke="#059669" stroke-width="2"/>
+        <text x="635" y="76" font-size="20" text-anchor="middle">⚡</text>
+        <text x="635" y="100" font-size="12.5" font-weight="900" text-anchor="middle" fill="#047857">Q4. 뎁스+신경망</text>
+        <text x="635" y="120" font-size="10.5" text-anchor="middle" fill="#475569">더 효율적이지</text>
+        <text x="635" y="136" font-size="10.5" text-anchor="middle" fill="#475569">않을까?</text>
+
+        <path d="M 707 97 L 730 97" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#ar)"/>
+
+        <rect x="735" y="45" width="115" height="105" rx="12" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+        <text x="792" y="76" font-size="20" text-anchor="middle">📊</text>
+        <text x="792" y="100" font-size="12.5" font-weight="900" text-anchor="middle" fill="#B91C1C">Q5. 증거는?</text>
+        <text x="792" y="120" font-size="10.5" text-anchor="middle" fill="#475569">비교 데이터</text>
+        <text x="792" y="136" font-size="10.5" text-anchor="middle" fill="#475569">DP3 벤치마크</text>
+
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#94A3B8"/></marker></defs>
+      </svg>
+      <div class="diagram-caption">개념(Q1) → 설계(Q2) → 구조 이해(Q3) → 가설(Q4) → 실측 검증(Q5) — 엔지니어의 사고 흐름 그 자체</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH1. 심이란? ══════ -->
+<section class="sec-alt">
+  <div class="wrap">
+    <span class="badge b-blue">CHAPTER 1</span>
+    <h2 class="sec-title">심(Seam) — 용접의 출발점</h2>
+
+    <div class="analogy a-blue">
+      <div class="analogy-ico">📄</div>
+      <div>
+        <div class="analogy-title">비유: 테이프 붙일 자리 찾기</div>
+        <div class="analogy-text">종이 두 장을 테이프로 붙이려면 두 종이가 만나는 <strong>경계선</strong>에 붙여야 하죠. 용접에서 그 경계선이 바로 <strong>심(Seam)</strong>입니다. 용접봉이 지나가야 할 길이에요.</div>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="430" y="28" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">심(Seam)은 어디에 있나?</text>
+        <!-- 철판 두 개 -->
+        <rect x="120" y="70" width="280" height="55" rx="4" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.5"/>
+        <rect x="415" y="70" width="280" height="55" rx="4" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.5"/>
+        <text x="260" y="102" font-size="13" text-anchor="middle" fill="#475569" font-weight="700">철판 A</text>
+        <text x="555" y="102" font-size="13" text-anchor="middle" fill="#475569" font-weight="700">철판 B</text>
+        <!-- 심 -->
+        <rect x="400" y="70" width="15" height="55" fill="#FEF3C7"/>
+        <path d="M 400 70 L 407 125 L 415 70" fill="#F59E0B" opacity="0.55"/>
+        <!-- 화살표 -->
+        <path d="M 407 45 L 407 63" stroke="#DC2626" stroke-width="2.5" marker-end="url(#ar2)"/>
+        <text x="407" y="40" font-size="12.5" text-anchor="middle" fill="#DC2626" font-weight="900">← 이 틈새 선이 심(Seam)!</text>
+        <!-- 문제 주석 -->
+        <text x="430" y="160" font-size="12" text-anchor="middle" fill="#B45309" font-weight="700">⚠️ 문제: 가공 오차·열 변형으로 매번 1~3mm씩 다른 곳에 있음 → "심을 찾는 눈"이 필요</text>
+        <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#DC2626"/></marker></defs>
+      </svg>
+      <div class="diagram-caption">심이 항상 같은 자리에 있다면 "티치 앤 플레이백"으로 충분 — 항상 다른 자리에 있어서 AI가 필요해진다</div>
+    </div>
+
+    <h3 style="font-weight:900; font-size:1.05rem; margin:2rem 0 0.75rem;">👁️ 심을 찾는 두 개의 눈 — 레이저비전 vs YOLO</h3>
+
+    <div class="analogy">
+      <div class="analogy-ico">🔦</div>
+      <div>
+        <div class="analogy-title">비유: 계단에 손전등 비추기</div>
+        <div class="analogy-text">어두운 방에서 손전등을 계단에 비추면 빛의 줄이 모서리에서 <strong>꺾이죠</strong>. 그 꺾인 모양만 봐도 계단이 있다는 걸 압니다. <strong>레이저비전(Laser Vision)</strong>은 일자 레이저 줄을 철판에 쏘고, 틈새에서 줄이 V자로 꺾이는 걸 카메라로 봐서 삼각측량으로 심의 3D 위치를 계산합니다.</div>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 210" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="230" y="28" font-size="13.5" font-weight="900" text-anchor="middle" fill="#1E293B">레이저비전 원리</text>
+        <!-- 레이저 프로젝터 -->
+        <rect x="185" y="45" width="46" height="26" rx="6" fill="#DC2626"/>
+        <text x="208" y="63" font-size="11" text-anchor="middle" fill="white" font-weight="700">레이저</text>
+        <!-- 카메라 -->
+        <rect x="290" y="45" width="46" height="26" rx="6" fill="#2563EB"/>
+        <text x="313" y="63" font-size="11" text-anchor="middle" fill="white" font-weight="700">카메라</text>
+        <!-- 레이저 빔 -->
+        <path d="M 208 71 L 208 130" stroke="#DC2626" stroke-width="2" stroke-dasharray="5,3"/>
+        <path d="M 313 71 L 240 130" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <!-- 철판 + 꺾인 레이저 라인 -->
+        <rect x="80" y="130" width="130" height="35" rx="3" fill="#CBD5E1"/>
+        <rect x="240" y="130" width="130" height="35" rx="3" fill="#CBD5E1"/>
+        <path d="M 90 132 L 208 132 L 225 152 L 242 132 L 360 132" stroke="#EF4444" stroke-width="3" fill="none"/>
+        <text x="228" y="188" font-size="11.5" text-anchor="middle" fill="#DC2626" font-weight="700">레이저 줄이 틈새에서 V자로 꺾임 → 삼각측량 → 깊이 계산</text>
+
+        <!-- 오른쪽: YOLO -->
+        <text x="640" y="28" font-size="13.5" font-weight="900" text-anchor="middle" fill="#1E293B">YOLO 심 감지 원리</text>
+        <rect x="500" y="45" width="280" height="115" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+        <rect x="520" y="80" width="105" height="45" rx="3" fill="#CBD5E1"/>
+        <rect x="648" y="80" width="105" height="45" rx="3" fill="#CBD5E1"/>
+        <rect x="625" y="80" width="23" height="45" fill="#FEF3C7"/>
+        <!-- YOLO 박스 -->
+        <rect x="612" y="68" width="50" height="68" rx="4" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-dasharray="6,3"/>
+        <text x="637" y="60" font-size="11" text-anchor="middle" fill="#7C3AED" font-weight="900">seam 94%</text>
+        <!-- 키포인트 -->
+        <circle cx="625" cy="80" r="4" fill="#DC2626"/><circle cx="648" cy="80" r="4" fill="#DC2626"/>
+        <circle cx="625" cy="125" r="4" fill="#DC2626"/><circle cx="648" cy="125" r="4" fill="#DC2626"/>
+        <text x="640" y="188" font-size="11.5" text-anchor="middle" fill="#6D28D9" font-weight="700">일반 카메라 영상에서 딥러닝이 심 위치를 직접 인식</text>
+      </svg>
+      <div class="diagram-caption">왼쪽: 레이저의 "꺾임"으로 깊이 측정 / 오른쪽: 학습된 YOLO가 박스+키포인트 4개로 심 인식</div>
+    </div>
+
+    <div class="co co-key">
+      <div class="co-ico">🎓</div>
+      <div><strong>YOLO는 따로 학습시켜야 하나? — 네.</strong> 기본 YOLO는 사람·자동차·컵만 알지 "용접 심" 클래스는 없습니다. 용접 이미지 수백~수천 장에 <strong>바운딩박스 1개 + 키포인트 4개</strong>만 찍어 fine-tuning합니다 (픽셀 단위 라벨링 불필요 → 라벨링 비용 대폭 감소). YOLOv8s-seg 분할 방식은 정확도 98.5%, 21fps 실시간까지 도달했습니다.</div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th></th><th>레이저비전</th><th>YOLO 심 감지</th><th>RealSense (참고)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>원리</strong></td><td>레이저 라인 + 삼각측량</td><td>카메라 영상 + 딥러닝</td><td>IR 패턴 + 스테레오</td></tr>
+          <tr><td><strong>정밀도</strong></td><td class="t-good">±0.1mm</td><td class="t-mid">서브픽셀</td><td class="t-mid">±2~5mm</td></tr>
+          <tr><td><strong>범위</strong></td><td>한 줄만 초정밀</td><td>화면 전체</td><td>화면 전체 뎁스맵</td></tr>
+          <tr><td><strong>학습</strong></td><td class="t-good">불필요</td><td class="t-bad">fine-tuning 필요</td><td class="t-good">불필요</td></tr>
+          <tr><td><strong>비용</strong></td><td class="t-bad">비쌈</td><td class="t-good">일반 카메라</td><td class="t-good">저렴 (~50만원)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="co co-tip">
+      <div class="co-ico">💡</div>
+      <div><strong>핵심 통찰: 레이저비전 = 뎁스 기술의 친척.</strong> 레이저비전, RealSense 모두 "빛을 쏘고 변형을 관찰해 깊이를 계산"하는 같은 가족입니다. 레이저비전은 "한 줄만 초정밀하게", RealSense는 "화면 전체를 적당한 정밀도로" 보는 차이일 뿐입니다. 실무에서는 <strong>둘을 함께</strong> 씁니다 — 레이저로 정밀 깊이, YOLO로 유연한 인식.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH2. 카트형 설계 ══════ -->
+<section>
+  <div class="wrap">
+    <span class="badge b-orange">CHAPTER 2</span>
+    <h2 class="sec-title">카트형 용접로봇 설계 — 왜 이 구성이 영리한가</h2>
+    <p class="sec-desc">"스스로 이동하지 않고, 사람이 밀고 가서, 고정한 뒤 작업한다" — 이 설계는 상용 제품(Hirebotics Cooper "Go There, Weld That")이 증명한 패턴입니다.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="430" y="28" font-size="14.5" font-weight="900" text-anchor="middle" fill="#1E293B">🛒 카트형 용접로봇 구성도</text>
+
+        <!-- 카트 본체 -->
+        <rect x="250" y="150" width="280" height="80" rx="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2.5"/>
+        <text x="390" y="180" font-size="12.5" text-anchor="middle" font-weight="900" fill="#B45309">카트 본체</text>
+        <text x="390" y="200" font-size="11" text-anchor="middle" fill="#78350F">RTX 5090 (32GB) + 전원 유선</text>
+        <text x="390" y="217" font-size="10.5" text-anchor="middle" fill="#92400E">용접기가 어차피 유선 → 전력 걱정 없음</text>
+        <!-- 바퀴 -->
+        <circle cx="290" cy="240" r="16" fill="#475569"/><circle cx="490" cy="240" r="16" fill="#475569"/>
+        <circle cx="290" cy="240" r="6" fill="#94A3B8"/><circle cx="490" cy="240" r="6" fill="#94A3B8"/>
+
+        <!-- 로봇 팔 -->
+        <rect x="330" y="105" width="16" height="48" rx="5" fill="#334155"/>
+        <rect x="336" y="72" width="70" height="14" rx="5" fill="#475569" transform="rotate(-20 336 82)"/>
+        <circle cx="410" cy="62" r="9" fill="#DC2626"/>
+        <text x="435" y="55" font-size="11" fill="#DC2626" font-weight="700">🔥 용접 토치</text>
+
+        <!-- 카메라들 -->
+        <rect x="455" y="100" width="42" height="22" rx="5" fill="#2563EB"/>
+        <text x="476" y="115" font-size="9" text-anchor="middle" fill="white" font-weight="700">RS×2</text>
+        <text x="545" y="108" font-size="10.5" fill="#1D4ED8" font-weight="700">RealSense (탑+사이드)</text>
+        <text x="545" y="124" font-size="10" fill="#64748B">팔과 함께 고정 = 캘리브레이션 영구 유지</text>
+
+        <rect x="455" y="132" width="42" height="16" rx="4" fill="#DC2626"/>
+        <text x="476" y="144" font-size="8.5" text-anchor="middle" fill="white" font-weight="700">Laser</text>
+        <text x="545" y="146" font-size="10.5" fill="#DC2626" font-weight="700">레이저 라인 센서 (용접 중 추적)</text>
+
+        <!-- 사람 -->
+        <circle cx="120" cy="140" r="16" fill="#F59E0B"/>
+        <rect x="108" y="158" width="24" height="46" rx="8" fill="#F59E0B"/>
+        <path d="M 133 172 L 240 185" stroke="#F59E0B" stroke-width="7" stroke-linecap="round"/>
+        <text x="120" y="235" font-size="11.5" text-anchor="middle" fill="#B45309" font-weight="900">사람이 밀고 이동</text>
+        <text x="120" y="252" font-size="10" text-anchor="middle" fill="#92400E">이동 지능 = 사람 (공짜, 최고 성능)</text>
+
+        <!-- 작업물 -->
+        <rect x="620" y="185" width="200" height="45" rx="6" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.5"/>
+        <rect x="712" y="185" width="12" height="45" fill="#FEF3C7"/>
+        <text x="720" y="260" font-size="11" text-anchor="middle" fill="#475569" font-weight="700">용접 대상 (도착 후 카트 고정)</text>
+      </svg>
+      <div class="diagram-caption">역할 분담의 경제학: 이동의 지능은 사람이, 용접의 지능만 AI가 — Path Robotics Rove(4족보행+용접AI)의 저비용 버전</div>
+    </div>
+
+    <div class="cmp-grid">
+      <div class="cmp-card" style="--cc:var(--green);">
+        <div class="cmp-title">✅ 이 설계가 좋은 4가지 이유</div>
+        <ul class="cmp-list">
+          <li><span>1️⃣</span><div><strong>hand-eye 캘리브레이션 영구 고정</strong> — 팔과 카메라가 한 몸이라 카트가 어디로 가든 좌표계 불변</div></li>
+          <li><span>2️⃣</span><div><strong>정지 상태 = RealSense 뎁스 안정</strong> — 이동 중 모션블러·뎁스 노이즈 원천 차단</div></li>
+          <li><span>3️⃣</span><div><strong>유선 전원 = 5090 탑재 가능</strong> — 용접기가 어차피 유선이므로 전력 제약 없는 드문 케이스</div></li>
+          <li><span>4️⃣</span><div><strong>ACT 학습 조건 충족</strong> — "카메라-작업물 관계 일정" 조건을 고정 방식이 보장</div></li>
+        </ul>
+      </div>
+      <div class="cmp-card" style="--cc:var(--red);">
+        <div class="cmp-title">⚠️ 보완해야 할 함정 2가지</div>
+        <ul class="cmp-list">
+          <li><span>🔆</span><div><strong>아크 빛이 켜지면 RealSense 뎁스 사망</strong> — 용접 아크는 IR 대역 포함 초강력 광원. RealSense의 IR 패턴을 완전히 덮어버림</div></li>
+          <li><span>💥</span><div><strong>스패터의 카메라 공격</strong> — 렌즈에 튀면 즉사. 보호유리(spatter shield) + 에어커튼 필수, 카메라는 멀리·비스듬히</div></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-weight:900; font-size:1.05rem; margin:2rem 0 0.75rem;">🕐 해결책: 인식의 2단계 분리 (시간축 역할 분담)</h3>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 210" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <!-- Phase A -->
+        <rect x="30" y="35" width="390" height="150" rx="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+        <text x="225" y="65" font-size="13.5" font-weight="900" text-anchor="middle" fill="#1D4ED8">Phase A — 용접 전 (아크 OFF)</text>
+        <text x="225" y="95" font-size="24" text-anchor="middle">📷 + 🗺️</text>
+        <text x="225" y="125" font-size="11.5" text-anchor="middle" fill="#334155">RealSense 뎁스 정상 작동 ✅</text>
+        <text x="225" y="145" font-size="11.5" text-anchor="middle" fill="#334155">SAM3 심 영역 분할 + 뎁스로 3D 경로 생성</text>
+        <text x="225" y="168" font-size="11" text-anchor="middle" fill="#1D4ED8" font-weight="700">"여기서 여기까지, 이 깊이로" 계획 확정</text>
+
+        <path d="M 428 110 L 455 110" stroke="#94A3B8" stroke-width="3" marker-end="url(#ar3)"/>
+        <text x="441" y="98" font-size="10" text-anchor="middle" fill="#64748B">바통터치</text>
+
+        <!-- Phase B -->
+        <rect x="460" y="35" width="370" height="150" rx="14" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+        <text x="645" y="65" font-size="13.5" font-weight="900" text-anchor="middle" fill="#B91C1C">Phase B — 용접 중 (아크 ON 🔥)</text>
+        <text x="645" y="95" font-size="24" text-anchor="middle">🔦 + 🎯</text>
+        <text x="645" y="125" font-size="11.5" text-anchor="middle" fill="#334155">RealSense 뎁스 신뢰 불가 ❌</text>
+        <text x="645" y="145" font-size="11.5" text-anchor="middle" fill="#334155">레이저 센서(밴드패스 필터) + 아크용 YOLO</text>
+        <text x="645" y="168" font-size="11" text-anchor="middle" fill="#B91C1C" font-weight="700">실시간 심 추적 + 열 변형 보정</text>
+
+        <defs><marker id="ar3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#94A3B8"/></marker></defs>
+      </svg>
+      <div class="diagram-caption">"레이저빔 + YOLO + SAM3"는 셋 다 필요 — 단, 시간축에서 역할이 나뉜다. Path Robotics의 "스캔→계획→적응용접" 단계 분리와 동일한 이유</div>
+    </div>
+
+    <div class="co co-warn">
+      <div class="co-ico">🔄</div>
+      <div><strong>용접만의 특별한 개념 — 연속 트리거:</strong> 다른 산업(재활용·물류)은 "감지 → 작동" 이 한 번이지만, 용접은 <strong>작동 중에도 감지가 계속</strong>됩니다. 용접하는 동안 철판이 열로 휘어서 경로가 실시간으로 바뀌기 때문입니다. 감지가 시작점이 아니라 작동 내내 함께 도는 구조 — 교육에서 이 차이를 짚어주면 이해가 한층 깊어집니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH3. 뎁스는 어디에? ══════ -->
+<section class="sec-alt">
+  <div class="wrap">
+    <span class="badge b-purple">CHAPTER 3</span>
+    <h2 class="sec-title">뎁스는 어디에 있나 — 용접로봇과 VLA의 진실</h2>
+
+    <div class="analogy a-purple">
+      <div class="analogy-ico">🧮</div>
+      <div>
+        <div class="analogy-title">비유: 계산기로 쓰느냐, 교과서로 쓰느냐</div>
+        <div class="analogy-text">용접로봇은 뎁스를 <strong>계산기처럼</strong> 씁니다 — 좌표를 계산하고 경로를 그리는 수학 도구. 반면 "뎁스 VLA"는 뎁스를 <strong>교과서처럼</strong> 씁니다 — 신경망이 뎁스를 보고 행동을 배우는 학습 재료. 같은 뎁스인데 쓰는 위치가 완전히 다릅니다.</div>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="430" y="28" font-size="14.5" font-weight="900" text-anchor="middle" fill="#1E293B">같은 뎁스, 다른 쓰임새</text>
+
+        <!-- 왼쪽: 용접로봇 방식 -->
+        <rect x="40" y="50" width="370" height="180" rx="14" fill="#FFF7ED" stroke="#D97706" stroke-width="2"/>
+        <text x="225" y="80" font-size="13" font-weight="900" text-anchor="middle" fill="#B45309">용접로봇 (Path 등) — 뎁스는 "수학"</text>
+        <rect x="70" y="100" width="130" height="46" rx="9" fill="#FED7AA"/>
+        <text x="135" y="120" font-size="11" text-anchor="middle" font-weight="700" fill="#7C2D12">레이저 뎁스</text>
+        <text x="135" y="136" font-size="10" text-anchor="middle" fill="#92400E">±0.1mm 측정</text>
+        <path d="M 208 123 L 240 123" stroke="#B45309" stroke-width="2.5" marker-end="url(#ar4)"/>
+        <rect x="245" y="100" width="140" height="46" rx="9" fill="#FED7AA"/>
+        <text x="315" y="120" font-size="11" text-anchor="middle" font-weight="700" fill="#7C2D12">기하학 계산</text>
+        <text x="315" y="136" font-size="10" text-anchor="middle" fill="#92400E">3D 좌표·경로 생성</text>
+        <text x="225" y="180" font-size="11" text-anchor="middle" fill="#78350F">전통 알고리즘 (삼각측량·경로계획)</text>
+        <text x="225" y="205" font-size="11.5" text-anchor="middle" fill="#B45309" font-weight="900">뎁스 없이는 용접로봇 성립 불가!</text>
+
+        <!-- 오른쪽: VLA -->
+        <rect x="450" y="50" width="370" height="180" rx="14" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+        <text x="635" y="80" font-size="13" font-weight="900" text-anchor="middle" fill="#6D28D9">유명 VLA (Pi0 등) — 뎁스 입력 ❌</text>
+        <rect x="480" y="100" width="130" height="46" rx="9" fill="#DDD6FE"/>
+        <text x="545" y="120" font-size="11" text-anchor="middle" font-weight="700" fill="#4C1D95">RGB 이미지만</text>
+        <text x="545" y="136" font-size="10" text-anchor="middle" fill="#5B21B6">2D 픽셀</text>
+        <path d="M 618 123 L 650 123" stroke="#6D28D9" stroke-width="2.5" marker-end="url(#ar5)"/>
+        <rect x="655" y="100" width="140" height="46" rx="9" fill="#DDD6FE"/>
+        <text x="725" y="120" font-size="11" text-anchor="middle" font-weight="700" fill="#4C1D95">VLM 신경망</text>
+        <text x="725" y="136" font-size="10" text-anchor="middle" fill="#5B21B6">깊이를 '추측'</text>
+        <text x="635" y="180" font-size="11" text-anchor="middle" fill="#5B21B6">Pi0·Pi0-FAST·OpenVLA·SmolVLA·GR00T N1·Helix</text>
+        <text x="635" y="205" font-size="11.5" text-anchor="middle" fill="#6D28D9" font-weight="900">전부 RGB 전용 — 구조적 이유가 있다</text>
+
+        <defs>
+          <marker id="ar4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#B45309"/></marker>
+          <marker id="ar5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#6D28D9"/></marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">용접로봇은 뎁스 덩어리(단, 기하 계산용) / 유명 VLA는 전부 RGB 전용 (뎁스를 신경망에 못 넣음)</div>
+    </div>
+
+    <div class="co co-purple">
+      <div class="co-ico">🧠</div>
+      <div><strong>왜 VLA는 RGB 전용인가 — 구조적 이유:</strong> VLA는 인터넷의 RGB 이미지-텍스트 수십억 장으로 사전학습된 VLM(PaliGemma, SigLIP 등)을 뇌로 씁니다. <strong>인터넷에는 뎁스맵이 없습니다.</strong> 뎁스를 넣으려면 사전학습의 이점을 버리거나 처음부터 다시 배워야 하는 딜레마 — 이것이 "현재 VLA는 고급 2D 패턴 모방 시스템"이라는 정직한 평가의 근거입니다.</div>
+    </div>
+
+    <div>
+      <input type="checkbox" id="acc-depthvla" class="acc-tog" hidden>
+      <label for="acc-depthvla" class="acc-hd">
+        <span>🔮 심화: 그런데 뎁스 VLA가 몰려오고 있다 (2025~2026 연구 물결)</span>
+        <span class="acc-chev">▸</span>
+      </label>
+      <div class="acc-bd">
+        <div class="tbl-wrap" style="margin-top:1rem;">
+          <table class="tbl">
+            <thead><tr><th>모델</th><th>접근 방식</th><th>주목 포인트</th></tr></thead>
+            <tbody>
+              <tr><td><strong>PointVLA</strong> (RA-L 2025)</td><td>사전학습 VLA에 <strong>재학습 없이</strong> 포인트클라우드 주입 (action expert 동결 + 경량 모듈)</td><td class="t-good">기존 RGB 데이터셋을 버리지 않음!</td></tr>
+              <tr><td><strong>SpatialVLA / DepthVLA</strong></td><td>뎁스맵 직접 통합 or depth expert 별도 운영</td><td class="t-dim">추가 센서 필요</td></tr>
+              <tr><td><strong>Evo-0 / Spatial Forcing</strong></td><td>뎁스 센서 없이 3D 파운데이션 모델(VGGT)의 공간 표현을 RGB에 주입</td><td class="t-mid">제3의 길</td></tr>
+              <tr><td><strong>FP3 / GeoVLA</strong></td><td>포인트클라우드 중심으로 파이프라인 재구축</td><td class="t-dim">연구 단계</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.87rem; color:var(--muted);">단, 논문들의 정직한 자기 지적도 있습니다: 명시적 3D 입력 방식은 특수 센서나 추가 추정 모델이 필요하고 카메라 시점 변화에 민감합니다. 아직 "Pi0급 완성도의 뎁스 VLA"는 없습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH4. 뎁스+신경망 효율성 ══════ -->
+<section>
+  <div class="wrap">
+    <span class="badge b-green">CHAPTER 4</span>
+    <h2 class="sec-title">"뎁스 + 신경망이 더 효율적이지 않나?" — 맞습니다, 그런데</h2>
+
+    <div class="analogy a-green">
+      <div class="analogy-ico">📏</div>
+      <div>
+        <div class="analogy-title">비유: 눈대중 vs 줄자</div>
+        <div class="analogy-text">RGB 모델은 "그림자 크기를 보니 아마 30cm쯤?"이라고 <strong>눈대중으로 추측하는 법을 수백 번 연습</strong>해야 합니다. 뎁스 모델은 <strong>줄자로 재서</strong> "30.2cm, 측정값"을 바로 받습니다. 추측을 배울 필요가 없으니 배울 게 줄어들죠 — 이게 샘플 효율이 높아지는 이유입니다.</div>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 240" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="430" y="28" font-size="14.5" font-weight="900" text-anchor="middle" fill="#1E293B">탑 + 사이드 뎁스 = 사각지대 없는 직교 조합</text>
+
+        <!-- 탑뷰 -->
+        <rect x="60" y="55" width="330" height="150" rx="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+        <text x="225" y="85" font-size="12.5" font-weight="900" text-anchor="middle" fill="#1D4ED8">📷 탑 뷰 뎁스 (위에서)</text>
+        <rect x="140" y="130" width="170" height="14" rx="3" fill="#CBD5E1"/>
+        <rect x="200" y="105" width="40" height="25" rx="4" fill="#3B82F6"/>
+        <rect x="95" y="70" width="36" height="18" rx="4" fill="#1D4ED8"/>
+        <path d="M 113 88 L 113 125 M 113 88 L 220 103" stroke="#3B82F6" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <text x="225" y="170" font-size="11" text-anchor="middle" fill="#1D4ED8" font-weight="700">XY 평면(배치) 완벽 ✅ / 높이·수직면 취약 ❌</text>
+
+        <!-- 사이드뷰 -->
+        <rect x="470" y="55" width="330" height="150" rx="14" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+        <text x="635" y="85" font-size="12.5" font-weight="900" text-anchor="middle" fill="#047857">📷 사이드 뷰 뎁스 (옆에서)</text>
+        <rect x="550" y="150" width="170" height="14" rx="3" fill="#CBD5E1"/>
+        <rect x="610" y="112" width="40" height="38" rx="4" fill="#10B981"/>
+        <rect x="505" y="115" width="18" height="34" rx="4" fill="#047857"/>
+        <path d="M 523 132 L 605 132" stroke="#10B981" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <text x="635" y="188" font-size="11" text-anchor="middle" fill="#047857" font-weight="700">높이·깊이축(Z) 완벽 ✅ / 반대편 가려짐 ❌</text>
+
+        <!-- 병합 -->
+        <text x="430" y="130" font-size="22" text-anchor="middle" fill="#7C3AED" font-weight="900">＋</text>
+        <text x="430" y="228" font-size="12" text-anchor="middle" fill="#6D28D9" font-weight="900">두 포인트클라우드 병합 → 서로의 가림(occlusion)을 정확히 상호 보완 → "측정된 공간"에서 팔이 움직임</text>
+      </svg>
+      <div class="diagram-caption">side 카메라가 깊이축 추정에 결정적이었던 기존 실험 결과의 연장선 — RGB 2뷰 "간접 추정"보다 뎁스 "직접 측정"이 강하다</div>
+    </div>
+
+    <h3 style="font-weight:900; font-size:1.05rem; margin:2rem 0 0.75rem;">⚖️ 그럼 왜 아직 RGB가 이기고 있나 — 정직한 반론 3가지</h3>
+
+    <div class="cmp-grid">
+      <div class="cmp-card" style="--cc:var(--red);">
+        <div class="cmp-title">① 사전학습 데이터가 없다</div>
+        <ul class="cmp-list">
+          <li><span>📚</span><div>RGB VLA는 인터넷 수십억 장의 "세상 지식"을 공짜로 상속. 뎁스에는 그런 인터넷 규모 데이터가 존재하지 않음</div></li>
+          <li><span>🤷</span><div>뎁스 정책은 "뭔가 튀어나와 있다"는 알지만 "저건 컵이고 손잡이를 잡아야 한다"는 모름 (기하 O, 의미 X)</div></li>
+        </ul>
+      </div>
+      <div class="cmp-card" style="--cc:var(--orange);">
+        <div class="cmp-title">② 실제 센서 뎁스는 지저분하다</div>
+        <ul class="cmp-list">
+          <li><span>💿</span><div>반사면(금속!)·투명체·가장자리에서 뎁스가 뻥뻥 뚫림</div></li>
+          <li><span>🌉</span><div>깨끗한 시뮬 뎁스로 배운 정책이 실기 노이즈에서 무너지는 Sim2Real 갭이 RGB보다 큼 — 용접의 금속 반사면은 최악의 조건</div></li>
+        </ul>
+      </div>
+      <div class="cmp-card" style="--cc:var(--purple);">
+        <div class="cmp-title">③ 시점 민감성</div>
+        <ul class="cmp-list">
+          <li><span>📐</span><div>카메라가 1cm 밀리면 포인트클라우드 전체가 틀어짐 — 캘리브레이션 유지가 RGB보다 훨씬 엄격</div></li>
+          <li><span>🛒</span><div>역설적으로 <strong>"카트에 카메라 고정" 설계가 이 약점을 정확히 방어</strong>한다!</div></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="co co-key">
+      <div class="co-ico">🔮</div>
+      <div><strong>수렴점 — "무서워지는" 시나리오:</strong> RGB VLA(의미는 알지만 공간은 추측) ↘ + 뎁스 정책(공간은 알지만 의미를 모름) ↗ → <strong>융합(PointVLA·GeoVLA·월드모델)</strong>에서 만납니다. "빨간 컵을 잡아"를 이해하면서 그 컵까지의 거리를 mm 단위로 아는 로봇 — Meta가 SAM 3D를, NVIDIA가 GR00T 합성 3D 데이터를 쏟아붓는 이유가 바로 ①번 문제(뎁스 사전학습 데이터 부재)를 돈으로 푸는 경쟁입니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH5. 증거: DP3 ══════ -->
+<section class="sec-alt">
+  <div class="wrap">
+    <span class="badge b-red">CHAPTER 5</span>
+    <h2 class="sec-title">증거를 보자 — RGB vs 뎁스 실측 비교 (DP3 벤치마크)</h2>
+    <p class="sec-desc">LeRobot 0.6은 뎁스 "저장"만 지원(PR #3644)하고 뎁스를 소비하는 정책이 아직 없어 공식 비교가 없습니다. 하지만 학계에는 정확히 그 비교 데이터가 있습니다 — DP3 논문(RSS 2024).</p>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sn" style="--sc:var(--red);">+24.2%</div><div class="sl">상대 성공률 향상</div><div class="sd">시뮬 72개 태스크, RGB DP 대비</div></div>
+      <div class="stat-card"><div class="sn" style="--sc:var(--primary);">10개</div><div class="sl">필요 시연 수</div><div class="sd">대부분 태스크 처리 성공</div></div>
+      <div class="stat-card"><div class="sn" style="--sc:var(--green);">85%</div><div class="sl">실기 평균 성공률</div><div class="sd">4개 태스크, 시연 40개</div></div>
+      <div class="stat-card"><div class="sn" style="--sc:var(--purple);">9/10</div><div class="sl">신규 환경 일반화 (iDP3)</div><div class="sd">이미지 정책은 급격히 붕괴</div></div>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 860 230" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+        <text x="430" y="28" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">성공률 90% 이상 달성한 태스크 수 (72개 중, 시연 10개 조건)</text>
+
+        <!-- RGB bar -->
+        <text x="150" y="90" font-size="12.5" font-weight="700" fill="#64748B" text-anchor="end">RGB Diffusion Policy</text>
+        <rect x="170" y="72" width="152" height="30" rx="6" fill="#94A3B8"/>
+        <text x="335" y="93" font-size="13" font-weight="900" fill="#64748B">15개 미만</text>
+
+        <!-- DP3 bar -->
+        <text x="150" y="145" font-size="12.5" font-weight="700" fill="#047857" text-anchor="end">DP3 (포인트클라우드)</text>
+        <rect x="170" y="127" width="305" height="30" rx="6" fill="#10B981"/>
+        <text x="488" y="148" font-size="13" font-weight="900" fill="#047857">약 30개 (2배)</text>
+
+        <text x="430" y="200" font-size="11.5" text-anchor="middle" fill="#64748B">+ 수렴 속도: DP3 ~500 에폭 vs RGB는 훨씬 느리거나 수렴 실패 · 분산도 DP3가 더 작음</text>
+      </svg>
+      <div class="diagram-caption">"뎁스는 샘플 효율을 올린다"의 실측 근거 — 같은 시연 수로 2배의 태스크를 정복</div>
+    </div>
+
+    <div class="co co-red">
+      <div class="co-ico">⚖️</div>
+      <div><strong>정직한 반대 데이터도 있다 (교육 포인트!):</strong> VLM-TDP 논문(RLBench)에서 잎이 우거진 화분처럼 <strong>어수선하고 가려진 장면에서는 3D 정책이 장면 파악에 실패</strong>했고 2D 정책이 오히려 이겼습니다. 얇거나 작은 물체(평평한 폰)는 둘 다 힘들었고요. 결론: <strong>"뎁스가 항상 이긴다"가 아니라 "공간 일반화가 관건인 태스크에서 이긴다."</strong></div>
+    </div>
+
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.75rem; margin-top:1.5rem;">
+      <div style="font-weight:900; font-size:1rem; margin-bottom:1rem;">💬 학생 토론 질문 (수업용)</div>
+      <p style="font-size:0.92rem;">"시연 10개로 RGB 정책은 실패하고 포인트클라우드 정책은 성공했다. 그런데 어수선한 장면에서는 역전됐다. <strong>왜일까?</strong>"</p>
+      <p style="font-size:0.85rem; color:var(--muted);">힌트: 뎁스는 기하를 측정하지만, 가림이 심하면 측정 자체가 불완전해진다. RGB는 색·질감이라는 별도의 단서로 가려진 물체를 추론할 수 있다. 각 모달리티가 강한 조건이 다르다 — 그래서 융합이 답이다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CH6. 전략 로드맵 ══════ -->
+<section>
+  <div class="wrap">
+    <span class="badge b-teal">CHAPTER 6</span>
+    <h2 class="sec-title">전략 종합 — ACT로 시작, 뎁스는 기록, VLA로 전환</h2>
+
+    <div class="analogy">
+      <div class="analogy-ico">🏦</div>
+      <div>
+        <div class="analogy-title">비유: 뎁스 기록은 적금이다</div>
+        <div class="analogy-text">지금 ACT가 뎁스를 안 쓰더라도, 데이터 수집 때 뎁스를 함께 녹화해두면(LeRobot PR #3644, gray12le 무손실) 미래에 뎁스 VLA가 성숙했을 때 <strong>데이터 재수집 비용 0원</strong>으로 전환할 수 있습니다. 용접 데이터는 재료비+시간이 비싼 데이터 — 지금 붓는 적금이 나중에 목돈이 됩니다. 특히 PointVLA의 "재학습 없이 주입" 방식은 이 전략의 가치를 재확인해줍니다.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.75rem; margin:1.5rem 0;">
+      <div class="rm-step" style="--rc:var(--primary);">
+        <div class="rm-num">1</div>
+        <div>
+          <div class="rm-title">카트 + SO-101(펜 드로잉 대체) + RealSense 2대 + ACT</div>
+          <div class="rm-desc">심 추적 개념 검증. 펜으로 선을 그리는 실습으로 용접을 안전하게 대체. <strong>뎁스 동시 기록을 지금부터 시작.</strong></div>
+        </div>
+      </div>
+      <div class="rm-step" style="--rc:var(--purple);">
+        <div class="rm-num">2</div>
+        <div>
+          <div class="rm-title">+ YOLO 심 감지 fine-tuning + SAM3 사전 스캔</div>
+          <div class="rm-desc">2단계 인식(용접 전 스캔 / 용접 중 추적) 파이프라인 완성. 박스+키포인트 4개 라벨링 방식으로 데이터셋 구축.</div>
+        </div>
+      </div>
+      <div class="rm-step" style="--rc:var(--orange);">
+        <div class="rm-num">3</div>
+        <div>
+          <div class="rm-title">+ 레이저 라인 센서 + 5090 카트 실장</div>
+          <div class="rm-desc">실제 용접 환경 대응 — 아크 빛(밴드패스 필터), 스패터(보호유리+에어커튼). 연속 트리거 구조 구현.</div>
+        </div>
+      </div>
+      <div class="rm-step" style="--rc:var(--green);">
+        <div class="rm-num">4</div>
+        <div>
+          <div class="rm-title">뎁스 VLA 벤치마크 → 실측 우위 시 전환</div>
+          <div class="rm-desc">전환 기준: <strong>"뎁스 VLA가 나왔다"가 아니라 "우리 태스크에서 ACT 성공률을 실측으로 이겼다"일 때.</strong> 새 모델 발표 ≠ 현장 우위 (pi0_fast/X-VLA 교훈). 축적된 뎁스 데이터셋으로 재학습.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <input type="checkbox" id="acc-class" class="acc-tog" hidden>
+      <label for="acc-class" class="acc-hd">
+        <span>📅 실습 플랜: 무리 없이 뎁스 개념을 수업에 얹는 3가지</span>
+        <span class="acc-chev">▸</span>
+      </label>
+      <div class="acc-bd">
+        <div style="margin-top:1rem;">
+          <p><strong>① 데이터 수집 시 뎁스 동시 기록만 켜기</strong> (5분 설정, 기존 흐름 영향 제로)</p>
+          <div class="codeblock">
+<span class="cc"># LeRobot 0.6 — 뎁스 동시 기록 옵션</span>
+lerobot-record \
+  --robot.type=so101_follower \
+  --dataset.rgb_encoder.vcodec=<span class="cs">libx264</span> \
+  --dataset.depth_encoder.vcodec=<span class="cs">hevc</span>   <span class="cc"># ← 이 줄 추가: gray12le 무손실 뎁스 기록</span>
+          </div>
+          <p style="font-size:0.87rem; color:var(--muted);">"지금은 안 쓰는데 왜 기록하나?"라는 학생 질문 자체가 최고의 수업 소재.</p>
+
+          <p style="margin-top:1.25rem;"><strong>② 5분 라이브 데모: <code>realsense-viewer</code> 포인트클라우드</strong></p>
+          <p style="font-size:0.87rem; color:var(--muted);">RGB 화면과 3D 뷰를 나란히 놓고 — "왼쪽은 추측해야 하는 정보, 오른쪽은 측정된 정보." 학생들이 '측정된 공간' 개념을 눈으로 즉시 이해합니다.</p>
+
+          <p style="margin-top:1.25rem;"><strong>③ DP3 숫자 한 장으로 토론</strong></p>
+          <p style="font-size:0.87rem; color:var(--muted);">위 Chapter 5의 토론 질문 활용. RGB/뎁스 트레이드오프 논의가 학생 토론으로 이어집니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ 최종 요약 ══════ -->
+<section class="sec-alt">
+  <div class="wrap">
+    <div class="summary">
+      <h3>🎯 핵심 요약 — 오늘 배운 6가지</h3>
+      <div class="sum-list">
+        <div class="sum-item"><span>1️⃣</span><div><strong>심(Seam)</strong> = 용접할 틈새 선. 매번 1~3mm씩 위치가 달라서 "찾는 눈"이 필요</div></div>
+        <div class="sum-item"><span>2️⃣</span><div><strong>레이저비전</strong> = 레이저 줄의 꺾임으로 깊이를 재는 초정밀(±0.1mm) 뎁스 기술. RealSense의 친척</div></div>
+        <div class="sum-item"><span>3️⃣</span><div><strong>YOLO 심 감지</strong> = 커스텀 학습 필요. 박스+키포인트 4개 라벨링으로 간단하게</div></div>
+        <div class="sum-item"><span>4️⃣</span><div><strong>카트형 설계</strong> = 이동은 사람, 용접만 AI. 캘리브레이션 고정 + 유선 5090. 함정은 아크 빛 → 2단계 인식으로 해결</div></div>
+        <div class="sum-item"><span>5️⃣</span><div><strong>뎁스의 위치</strong> — 용접로봇은 뎁스를 "수학"으로, 유명 VLA(Pi0 등)는 전부 RGB 전용 (인터넷에 뎁스가 없어서)</div></div>
+        <div class="sum-item"><span>6️⃣</span><div><strong>실측 증거</strong> — DP3: 시연 10개로 +24.2%, 실기 85%. 단 어수선한 장면에선 2D가 역전 → "융합이 답"</div></div>
+      </div>
+    </div>
+
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:2.25rem; text-align:center;">
+      <div style="font-family:'Hahmlet',serif; font-size:clamp(1.05rem,2.5vw,1.3rem); font-weight:900; line-height:1.65; margin-bottom:0.9rem;">
+        "뎁스는 지금 <span style="color:var(--orange);">인식층에서 가치</span>를 만들고,<br>
+        ACT(RGB)로 <span style="color:var(--primary);">행동을 배우고</span>,<br>
+        뎁스는 <span style="color:var(--green);">적금처럼 기록</span>해두고,<br>
+        뎁스 VLA가 <span style="color:var(--purple);">실측으로 이기는 날</span> 갈아탄다"
+      </div>
+      <div style="font-size:0.85rem; color:var(--muted);">— 새 모델 발표 ≠ 현장 우위. 판단은 언제나 실측으로.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer style="background:#1E293B; color:white; padding:2.5rem 0;">
+  <div class="wrap" style="text-align:center;">
+    <div style="font-family:'Hahmlet',serif; font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">ZETA Satellite Robotics</div>
+    <p style="color:#94A3B8; font-size:0.78rem; margin:0;">
+      용접로봇과 뎁스 AI — 심 감지부터 뎁스 VLA 전환 전략까지<br>
+      References: DP3 (RSS 2024, arXiv 2403.03954) · PointVLA (RA-L 2025) · Path Robotics · HD Hyundai Robotics · LeRobot PR #3644 · VLM-TDP · ScienceDirect/PMC 용접 비전 연구
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
