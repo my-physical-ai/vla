@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACT 파라미터 10가지 — 초등학생도 이해하는 로봇 조련사 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Hahmlet:wght@300;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --p1:#DC2626; --p1l:#FEE2E2;
+      --p2:#EA580C; --p2l:#FFEDD5;
+      --p3:#D97706; --p3l:#FEF3C7;
+      --p4:#65A30D; --p4l:#ECFCCB;
+      --p5:#059669; --p5l:#D1FAE5;
+      --p6:#0891B2; --p6l:#CFFAFE;
+      --p7:#2563EB; --p7l:#DBEAFE;
+      --p8:#7C3AED; --p8l:#EDE9FE;
+      --p9:#DB2777; --p9l:#FCE7F3;
+      --p10:#B45309; --p10l:#FEF3C7;
+      --card:#FFFFFF; --surface:#FDFBF7;
+      --text:#1E293B; --muted:#64748B; --dim:#94A3B8; --border:#E2E8F0;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--surface); color:var(--text); line-height:1.8; }
+    .wrap { max-width:920px; margin:0 auto; padding:0 1.5rem; }
+    section { padding:3.5rem 0; }
+    p { font-size:0.94rem; line-height:1.85; margin-bottom:1rem; }
+    p:last-child { margin-bottom:0; }
+    code { font-family:'JetBrains Mono',monospace; font-size:0.83rem; background:#F1F5F9; color:#334155; padding:0.15rem 0.5rem; border-radius:5px; border:1px solid #E2E8F0; }
+
+    .hero { background:linear-gradient(135deg,#4C1D95,#7C3AED 50%,#DB2777); color:white; padding:5rem 0 4rem; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.14) 1.5px, transparent 1.5px); background-size:32px 32px; }
+    .hero .wrap { position:relative; z-index:1; }
+    .hero-chip { display:inline-block; background:rgba(255,255,255,0.2); border:1.5px solid rgba(255,255,255,0.35); border-radius:999px; padding:0.4rem 1.2rem; font-size:0.78rem; font-weight:700; letter-spacing:0.06em; margin-bottom:1.5rem; }
+    .hero h1 { font-family:'Hahmlet',serif; font-size:clamp(2rem,5vw,3rem); font-weight:900; line-height:1.18; margin-bottom:1.25rem; }
+    .hero-sub { font-size:1.02rem; opacity:0.95; max-width:660px; line-height:1.72; margin-bottom:1.5rem; }
+    .hero-badges { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .hero-badge { background:rgba(255,255,255,0.18); border-radius:8px; padding:0.35rem 0.85rem; font-size:0.8rem; font-weight:700; }
+
+    .intro-card { background:var(--card); border-radius:18px; padding:2rem; box-shadow:0 6px 24px rgba(15,23,42,0.06); margin-bottom:2rem; }
+
+    .p-card { background:var(--card); border-radius:20px; padding:2.25rem; box-shadow:0 6px 24px rgba(15,23,42,0.07); margin-bottom:2rem; border-top:6px solid var(--pc,var(--p1)); position:relative; overflow:hidden; }
+    .p-card::before { content:attr(data-num); position:absolute; top:-30px; right:-10px; font-family:'Hahmlet',serif; font-size:8rem; font-weight:900; color:var(--pc,var(--p1)); opacity:0.08; line-height:1; }
+    .p-head { display:flex; align-items:flex-start; gap:1rem; margin-bottom:1.25rem; position:relative; }
+    .p-num { width:56px; height:56px; border-radius:16px; flex-shrink:0; background:var(--pc,var(--p1)); color:white; display:flex; align-items:center; justify-content:center; font-family:'Hahmlet',serif; font-size:1.75rem; font-weight:900; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+    .p-title-block { flex:1; }
+    .p-eyebrow { font-size:0.74rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--pc,var(--p1)); margin-bottom:0.35rem; }
+    .p-title { font-family:'Hahmlet',serif; font-size:1.3rem; font-weight:900; line-height:1.3; margin-bottom:0.5rem; }
+    .p-code { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.82rem; font-weight:700; background:var(--pcl,var(--p1l)); color:var(--pc,var(--p1)); padding:0.35rem 0.75rem; border-radius:8px; }
+
+    .kids-story { background:var(--pcl,var(--p1l)); border-radius:14px; padding:1.4rem 1.6rem; margin:1.25rem 0; }
+    .kids-story-title { display:flex; align-items:center; gap:0.4rem; font-weight:900; font-size:1rem; color:var(--pc,var(--p1)); margin-bottom:0.6rem; }
+    .kids-story p { font-size:0.94rem; line-height:1.82; margin-bottom:0.7rem; }
+    .kids-story p:last-child { margin-bottom:0; }
+
+    .analogy-line { display:flex; gap:0.85rem; align-items:flex-start; padding:1rem 1.25rem; background:#FFF7ED; border-left:4px solid #F59E0B; border-radius:10px; margin:1rem 0; }
+    .analogy-ico { font-size:1.7rem; flex-shrink:0; }
+    .analogy-body { font-size:0.92rem; line-height:1.7; }
+
+    .range-vis { background:#F8FAFC; border-radius:14px; padding:1.4rem; margin:1.25rem 0; border:1px solid var(--border); }
+    .range-title { font-size:0.85rem; font-weight:700; color:var(--muted); margin-bottom:1rem; text-align:center; }
+    .range-bar { display:flex; align-items:stretch; gap:0; height:70px; border-radius:10px; overflow:hidden; margin-bottom:0.75rem; }
+    .range-cell { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0.6rem 0.5rem; text-align:center; }
+    .rc-small { background:#FEE2E2; color:#991B1B; }
+    .rc-good  { background:#D1FAE5; color:#065F46; border-left:2px solid white; border-right:2px solid white; }
+    .rc-big   { background:#FEF3C7; color:#78350F; }
+    .rc-label { font-size:0.72rem; font-weight:700; letter-spacing:0.03em; margin-bottom:0.15rem; }
+    .rc-val   { font-family:'JetBrains Mono',monospace; font-size:0.78rem; font-weight:700; }
+    .range-note { display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:var(--muted); }
+
+    .compare { display:grid; grid-template-columns:1fr 1fr; gap:0; margin:1.25rem 0; border-radius:14px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.05); }
+    .cmp-side { padding:1.25rem; }
+    .cmp-bad { background:#FEF2F2; border-right:2px solid white; }
+    .cmp-good { background:#F0FDF4; }
+    .cmp-label { font-size:0.75rem; font-weight:900; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.7rem; }
+    .cmp-bad .cmp-label { color:#B91C1C; }
+    .cmp-good .cmp-label { color:#047857; }
+    .cmp-content { font-size:0.86rem; line-height:1.65; }
+
+    .real-example { background:#EFF6FF; border-radius:14px; padding:1.25rem 1.4rem; border-left:4px solid #2563EB; margin:1.25rem 0; }
+    .re-title { font-weight:900; font-size:0.9rem; color:#1D4ED8; margin-bottom:0.55rem; display:flex; align-items:center; gap:0.4rem; }
+    .re-body { font-size:0.9rem; line-height:1.72; }
+
+    .rule-box { background:linear-gradient(135deg,#FEF3C7,#FDE68A); border-radius:12px; padding:1.1rem 1.35rem; margin:1.25rem 0; border:1.5px dashed #D97706; }
+    .rule-label { font-size:0.75rem; font-weight:900; color:#78350F; letter-spacing:0.08em; margin-bottom:0.4rem; }
+    .rule-body { font-size:0.9rem; color:#713F12; line-height:1.68; }
+
+    .diagram-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.35rem; margin:1.25rem 0; box-shadow:0 3px 8px rgba(0,0,0,0.04); overflow-x:auto; }
+    .diagram-box svg { display:block; margin:0 auto; max-width:100%; height:auto; }
+    .diagram-caption { text-align:center; font-size:0.8rem; color:var(--muted); margin-top:0.7rem; line-height:1.55; }
+
+    .overview { background:var(--card); border-radius:18px; padding:2rem; box-shadow:0 6px 24px rgba(15,23,42,0.06); margin-bottom:2rem; }
+    .ov-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.7rem; margin-top:1.25rem; }
+    .ov-item { background:var(--ovc,var(--p1l)); border-radius:11px; padding:0.9rem 1rem; border-left:4px solid var(--ovs,var(--p1)); }
+    .ov-n { font-family:'Hahmlet',serif; font-size:1.1rem; font-weight:900; color:var(--ovs,var(--p1)); }
+    .ov-t { font-weight:800; font-size:0.85rem; margin-top:0.15rem; line-height:1.4; }
+    .ov-d { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; line-height:1.5; }
+
+    .trouble-tbl { width:100%; border-collapse:collapse; background:var(--card); border-radius:14px; overflow:hidden; box-shadow:0 4px 12px rgba(15,23,42,0.06); margin:1.5rem 0; }
+    .trouble-tbl th { background:#312E81; color:white; padding:0.85rem 1rem; text-align:left; font-size:0.8rem; font-weight:700; }
+    .trouble-tbl td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); font-size:0.88rem; vertical-align:top; }
+    .trouble-tbl tr:last-child td { border-bottom:none; }
+    .trouble-tbl tr:nth-child(even) td { background:#FAFBFF; }
+    .tc-sym { font-weight:700; color:#B91C1C; }
+    .tc-fix { font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:#5B21B6; }
+
+    .sec-mark { color:var(--muted); font-size:0.78rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.5rem; }
+    .sec-heading { font-family:'Hahmlet',serif; font-size:1.5rem; font-weight:900; line-height:1.3; margin-bottom:0.75rem; }
+
+    .final { background:linear-gradient(135deg,#0F172A,#4C1D95); border-radius:20px; padding:2.75rem; color:white; margin:2rem 0; position:relative; overflow:hidden; }
+    .final::before { content:''; position:absolute; top:-60px; right:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(219,39,119,0.3) 0%,transparent 70%); }
+    .final h3 { font-family:'Hahmlet',serif; font-size:1.35rem; font-weight:900; margin-bottom:1.5rem; position:relative; z-index:1; }
+    .final-quote { font-family:'Hahmlet',serif; font-size:1.15rem; font-weight:900; line-height:1.65; text-align:center; position:relative; z-index:1; background:rgba(255,255,255,0.08); border-radius:14px; padding:1.75rem; }
+
+    @media(max-width:768px){
+      .compare { grid-template-columns:1fr; }
+      .cmp-bad { border-right:none; border-bottom:2px solid white; }
+      .range-bar { flex-direction:column; height:auto; }
+    }
+    @media print {
+      .hero, .final { background:white!important; color:black!important; border:2px solid var(--p1); }
+      .p-card { break-inside:avoid; page-break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-chip">🎯 로봇 조련사 되기 · ACT 파라미터 완전정복</div>
+    <h1>ACT 파라미터 10가지<br>— 초등학생도 이해하는 로봇 조련사 가이드</h1>
+    <p class="hero-sub">
+      ACT로 로봇을 훈련시킬 때 가장 많이 만지는 10개의 "손잡이(파라미터)"를 
+      비유·그림·실전 규칙으로 하나씩 풀어드립니다. 
+      로봇이 말을 안 들으면 어느 손잡이를 돌려야 할지, 이제 알게 됩니다.
+    </p>
+    <div class="hero-badges">
+      <span class="hero-badge">💗 chunk_size</span>
+      <span class="hero-badge">⏱️ n_action_steps</span>
+      <span class="hero-badge">🎨 kl_weight</span>
+      <span class="hero-badge">📈 learning_rate</span>
+      <span class="hero-badge">👁️ vision_backbone</span>
+      <span class="hero-badge">🧠 그리고 더</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-mark">시작하기 전에</div>
+    <h2 class="sec-heading">🎛️ "파라미터"가 뭐예요?</h2>
+
+    <div class="intro-card">
+      <div class="analogy-line">
+        <div class="analogy-ico">🎚️</div>
+        <div class="analogy-body">
+          <strong>비유: 오디오 믹서의 손잡이들</strong><br>
+          음악 스튜디오에 가면 수십 개의 손잡이가 있는 큰 기계가 있어요. 
+          손잡이 하나를 돌리면 <strong>베이스가 커지고</strong>, 다른 하나는 <strong>고음이 세지고</strong>...
+          각 손잡이가 소리의 한 부분을 조절합니다. 
+          <strong>ACT의 파라미터도 똑같아요.</strong> 
+          하나는 로봇의 "미래 계획 길이"를, 다른 하나는 "학습 속도"를 조절합니다.
+        </div>
+      </div>
+
+      <p style="margin-top:1.25rem;">파라미터를 잘 조절하면 로봇이 매끄럽게 움직이고, 잘못 조절하면 로봇이 뚝뚝 끊기거나 아예 안 움직여요. <strong>좋은 조련사가 되려면 어떤 손잡이가 뭘 하는지 알아야</strong> 합니다.</p>
+    </div>
+
+    <div class="overview">
+      <div class="sec-mark">10대 파라미터 한눈에 보기</div>
+      <h2 class="sec-heading" style="font-size:1.15rem;">중요도 순으로 정렬했어요 (① → ⑩)</h2>
+
+      <div class="ov-grid">
+        <div class="ov-item" style="--ovs:var(--p1);--ovc:var(--p1l);"><div class="ov-n">①</div><div class="ov-t">chunk_size = 50</div><div class="ov-d">로봇의 심장 · 미래 예측 길이</div></div>
+        <div class="ov-item" style="--ovs:var(--p2);--ovc:var(--p2l);"><div class="ov-n">②</div><div class="ov-t">n_action_steps = 20</div><div class="ov-d">실행 후 재예측 주기</div></div>
+        <div class="ov-item" style="--ovs:var(--p3);--ovc:var(--p3l);"><div class="ov-n">③</div><div class="ov-t">kl_weight = 0.1</div><div class="ov-d">시연 다양성 조절 (VAE)</div></div>
+        <div class="ov-item" style="--ovs:var(--p4);--ovc:var(--p4l);"><div class="ov-n">④</div><div class="ov-t">steps = 100,000</div><div class="ov-d">총 훈련 반복 횟수</div></div>
+        <div class="ov-item" style="--ovs:var(--p5);--ovc:var(--p5l);"><div class="ov-n">⑤</div><div class="ov-t">learning_rate = 1e-4</div><div class="ov-d">한 걸음의 크기</div></div>
+        <div class="ov-item" style="--ovs:var(--p6);--ovc:var(--p6l);"><div class="ov-n">⑥</div><div class="ov-t">vision_backbone</div><div class="ov-d">로봇의 눈 종류 (ResNet)</div></div>
+        <div class="ov-item" style="--ovs:var(--p7);--ovc:var(--p7l);"><div class="ov-n">⑦</div><div class="ov-t">dim_model = 384</div><div class="ov-d">두뇌 크기</div></div>
+        <div class="ov-item" style="--ovs:var(--p8);--ovc:var(--p8l);"><div class="ov-n">⑧</div><div class="ov-t">encoder/decoder 층</div><div class="ov-d">두뇌 깊이</div></div>
+        <div class="ov-item" style="--ovs:var(--p9);--ovc:var(--p9l);"><div class="ov-n">⑨</div><div class="ov-t">dropout = 0.1</div><div class="ov-d">외우기 방지 훈련</div></div>
+        <div class="ov-item" style="--ovs:var(--p10);--ovc:var(--p10l);"><div class="ov-n">⑩</div><div class="ov-t">scheduler 삼총사</div><div class="ov-d">학습 속도의 시간 변화</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="01" style="--pc:var(--p1);--pcl:var(--p1l);">
+      <div class="p-head">
+        <div class="p-num">1</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">가장 중요한 파라미터 · ACT의 심장</div>
+          <div class="p-title">💗 chunk_size — 미래 몇 초를 한 번에 계획할까?</div>
+          <div class="p-code">--policy.chunk_size=50</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 축구를 할 때, 골대 앞에서 <strong>1초 뒤에 어디로 뛸지</strong>만 생각하나요, 아니면 <strong>다음 5초 동안 뭘 할지</strong> 미리 그려두나요?</p>
+        <p>진짜 잘하는 선수는 <strong>미리 몇 초를 계획</strong>합니다. "패스 받고 → 오른쪽으로 두 걸음 → 슛!" 이렇게요. 이걸 매 순간마다 새로 생각하면 너무 느리고 헷갈리죠.</p>
+        <p>ACT의 <code>chunk_size</code>도 똑같아요. <strong>"로봇아, 한 번에 미래 50개 동작을 미리 계획해!"</strong>라고 알려주는 값입니다. 30Hz로 움직이는 로봇이면 50개 = 약 <strong>1.7초의 미래</strong>를 한꺼번에 그려요.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🎼</div>
+        <div class="analogy-body">
+          <strong>또 다른 비유: 악보의 마디</strong> — 음악가는 한 마디씩 미리 읽고 연주합니다. 
+          마디가 너무 짧으면(음표 3개) 자꾸 끊기고, 너무 길면(음표 100개) 나중에 틀리기 쉬워요. 
+          적절한 마디 길이가 부드러운 연주를 만들듯, chunk_size가 부드러운 로봇 동작을 만듭니다.
+        </div>
+      </div>
+
+      <div class="range-vis">
+        <div class="range-title">🎯 chunk_size 값에 따른 결과</div>
+        <div class="range-bar">
+          <div class="range-cell rc-small">
+            <div class="rc-label">너무 작음</div>
+            <div class="rc-val">10~20</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 표준</div>
+            <div class="rc-val">50~100</div>
+          </div>
+          <div class="range-cell rc-big">
+            <div class="rc-label">너무 큼</div>
+            <div class="rc-val">200+</div>
+          </div>
+        </div>
+        <div class="range-note">
+          <span>← 자주 재예측 → 뚝뚝 끊김</span>
+          <span>먼 미래 예측 부정확 →</span>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="cmp-side cmp-bad">
+          <div class="cmp-label">❌ chunk_size가 너무 작으면 (10)</div>
+          <div class="cmp-content">
+            🔴 매번 새로 예측해야 해서 로봇이 <strong>덜덜덜</strong> 떨리듯 움직여요<br>
+            🔴 부드러운 궤적(용접 심 추적 등)이 지그재그가 됨<br>
+            🔴 GPU가 계속 바빠짐
+          </div>
+        </div>
+        <div class="cmp-side cmp-good">
+          <div class="cmp-label">✅ chunk_size가 적절하면 (50)</div>
+          <div class="cmp-content">
+            💚 <strong>부드러운 궤적</strong>으로 매끄럽게 움직임<br>
+            💚 실행하는 동안 다음 계획을 여유롭게 세울 수 있음<br>
+            💚 SO-101 픽앤플레이스 표준 설정
+          </div>
+        </div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">🌟 실전 예시</div>
+        <div class="re-body">
+          <strong>핑크 인형 집기</strong>: chunk_size = 50이 표준 ✅<br>
+          <strong>용접 심 추적</strong>: chunk_size = 100 정도로 늘리면 더 부드러움<br>
+          <strong>빠른 반응 필요 (핑퐁 등)</strong>: chunk_size = 20~30으로 짧게
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"부드러운 동작이 중요하면 → chunk 늘리기. 빠른 반응이 중요하면 → chunk 줄이기." 대부분 태스크는 <strong>50이 안전지대</strong>입니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="02" style="--pc:var(--p2);--pcl:var(--p2l);">
+      <div class="p-head">
+        <div class="p-num">2</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">chunk_size의 짝꿍</div>
+          <div class="p-title">⏱️ n_action_steps — 계획 중 실제로 몇 개만 실행할까?</div>
+          <div class="p-code">--policy.n_action_steps=20</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 <strong>공부 계획을 100문제</strong>로 짰다고 해봐요. 하지만 30문제쯤 풀고 나면 <strong>다음 계획을 새로 짜야</strong> 하죠. 왜냐하면 상황이 바뀌었으니까요.</p>
+        <p>로봇도 똑같아요. <strong>미래 50개 동작(chunk_size)을 계획했지만</strong>, 그 중 <strong>20개만 실행</strong>하고 <strong>다시 50개를 새로 예측</strong>합니다. 이걸 반복해요.</p>
+        <p>왜 다 실행 안 하죠? 계획한 후 상황이 조금 바뀌니까요! 인형이 조금 움직였을 수도, 로봇 팔이 살짝 벗어났을 수도 있잖아요.</p>
+      </div>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+          <text x="430" y="25" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">🔄 예측하고 → 실행하고 → 다시 예측 (반복)</text>
+
+          <text x="30" y="60" font-size="11" font-weight="700" fill="#DC2626">1번째 예측: 50개 계획</text>
+          <rect x="30" y="70" width="500" height="28" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5"/>
+          <text x="280" y="88" font-size="10" text-anchor="middle" fill="#B91C1C" font-weight="700">50개 미래 동작 예측</text>
+
+          <text x="30" y="120" font-size="11" font-weight="700" fill="#059669">그 중 20개만 실행 ✅</text>
+          <rect x="30" y="130" width="200" height="28" rx="6" fill="#D1FAE5" stroke="#059669" stroke-width="1.5"/>
+          <text x="130" y="148" font-size="10" text-anchor="middle" fill="#047857" font-weight="700">20개 실행 (n_action_steps)</text>
+          <rect x="230" y="130" width="300" height="28" rx="6" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="380" y="148" font-size="10" text-anchor="middle" fill="#64748B">30개는 버려요 (다음 예측에서 다시)</text>
+
+          <path d="M 130 165 L 130 190" stroke="#94A3B8" stroke-width="2" marker-end="url(#am2)"/>
+          <text x="150" y="182" font-size="10" fill="#64748B">20개 다 실행하면</text>
+
+          <text x="30" y="205" font-size="11" font-weight="700" fill="#DC2626">2번째 예측: 다시 50개 새로 계획</text>
+          <rect x="230" y="215" width="500" height="28" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5"/>
+          <text x="480" y="233" font-size="10" text-anchor="middle" fill="#B91C1C" font-weight="700">50개 미래 동작 재예측</text>
+
+          <defs><marker id="am2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#94A3B8"/></marker></defs>
+        </svg>
+        <div class="diagram-caption">50개 예측 → 20개 실행 → 다시 50개 예측 → 20개 실행... 겹치는 부분(오버랩)이 있어서 RTC가 부드럽게 이어붙여요</div>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🍞</div>
+        <div class="analogy-body">
+          <strong>비유: 식빵 자르기</strong> — 식빵 한 덩어리(chunk_size 50)를 다 자르지 않고 <strong>앞부분 20조각만</strong> 자르고, 다시 새 식빵을 가져와서 또 앞 20조각을 잘라요. 
+          <strong>남은 30조각은 겹쳐 있어서</strong> 새 식빵과 이어붙이면 부드럽게 연결됩니다. 이게 LeRobot의 <strong>RTC(Real-Time Chunking)</strong> 원리예요.
+        </div>
+      </div>
+
+      <div class="range-vis">
+        <div class="range-title">🎯 n_action_steps 값에 따른 결과 (chunk_size=50 기준)</div>
+        <div class="range-bar">
+          <div class="range-cell rc-small">
+            <div class="rc-label">너무 작음</div>
+            <div class="rc-val">5~10</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 표준</div>
+            <div class="rc-val">15~25</div>
+          </div>
+          <div class="range-cell rc-big">
+            <div class="rc-label">너무 큼</div>
+            <div class="rc-val">40+</div>
+          </div>
+        </div>
+        <div class="range-note">
+          <span>← GPU 과부하 · 반응성↑</span>
+          <span>오래된 예측 사용 → 오차↑</span>
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body"><strong>n_action_steps = chunk_size의 30~50%</strong>가 스위트스팟. 지금 20/50 = 40%로 완벽해요. 로봇이 뚝뚝 끊기면 <strong>더 낮게(15)</strong>, GPU가 힘들면 <strong>더 높게(30)</strong>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="03" style="--pc:var(--p3);--pcl:var(--p3l);">
+      <div class="p-head">
+        <div class="p-num">3</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">ACT만의 특별한 값</div>
+          <div class="p-title">🎨 kl_weight — 여러 시연을 어떻게 섞을까?</div>
+          <div class="p-code">--policy.kl_weight=0.1</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 로봇에게 <strong>인형 집기를 100번</strong> 시연했다고 해봐요. 100번 다 <strong>완전히 똑같이</strong> 하셨을까요? 아니에요! 
+          <strong>어떤 때는 왼쪽에서, 어떤 때는 오른쪽에서, 어떤 때는 빨리, 어떤 때는 천천히</strong> 잡으셨겠죠.</p>
+        <p>이제 로봇 입장에서 보면 헷갈립니다. "어? 저 사람은 왼쪽에서 잡던데... 아니, 오른쪽에서도 잡던데..."</p>
+        <p><code>kl_weight</code>는 이 헷갈림을 조절하는 값이에요. 
+          <strong>낮으면 "다양한 방식을 다 배워"</strong>가 되고, 
+          <strong>높으면 "가장 평균적인 방식으로 통일해"</strong>가 됩니다.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🎨</div>
+        <div class="analogy-body">
+          <strong>비유: 물감 섞기</strong> — 빨강+파랑+노랑 물감을 접시에 놨어요. 
+          <strong>안 섞으면(kl_weight 낮음)</strong> 세 색이 다 살아있어요. 
+          <strong>많이 섞으면(kl_weight 높음)</strong> 갈색(평균) 하나만 남죠. 
+          너무 안 섞어도 불안정하고, 너무 섞어도 개성이 사라져요. <strong>적당히 섞는 게 예술입니다.</strong>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="cmp-side cmp-bad">
+          <div class="cmp-label">❌ kl_weight = 0.01 (너무 낮음)</div>
+          <div class="cmp-content">
+            🔴 모든 시연을 다 반영하려다 <strong>혼란</strong>스러워짐<br>
+            🔴 학습이 불안정 (loss가 널뛰기)<br>
+            🔴 로봇이 이상한 동작을 함
+          </div>
+        </div>
+        <div class="cmp-side cmp-good">
+          <div class="cmp-label">✅ kl_weight = 0.1 (표준)</div>
+          <div class="cmp-content">
+            💚 다양한 시연을 <strong>부드럽게 통합</strong>함<br>
+            💚 ACT 논문 기본값 = 검증된 값<br>
+            💚 안정적인 학습 곡선
+          </div>
+        </div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">💡 ACT만의 비밀 무기 — VAE</div>
+        <div class="re-body">
+          ACT는 안에 <strong>VAE(변이형 오토인코더)</strong>라는 특별한 부품이 있어요. 
+          이건 "여러 시연의 <strong>다양성</strong>을 하나의 부드러운 공간에 저장하는 장치"입니다. 
+          <code>kl_weight</code>는 이 VAE가 얼마나 강하게 "정리정돈"할지 정하는 값이에요. 
+          <strong>Pi0, SmolVLA 같은 다른 모델에는 없는</strong> ACT만의 개념입니다.
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body"><strong>0.1은 논문 기본값이자 실전 표준</strong>. 함부로 바꾸지 마세요! 다만 로봇이 너무 "평균적"으로만 움직이면 <strong>0.05로 낮춰</strong> 다양성을 살리고, 학습이 불안정하면 <strong>0.2로 올려</strong> 안정화합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="04" style="--pc:var(--p4);--pcl:var(--p4l);">
+      <div class="p-head">
+        <div class="p-num">4</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">얼마나 오래 훈련할까</div>
+          <div class="p-title">📅 steps — 총 훈련 반복 횟수</div>
+          <div class="p-code">--steps=100000 --eval_freq=2000 --save_freq=2000</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 새 노래를 외우려면 <strong>몇 번을 불러봐야</strong> 할까요? 한 번? 아니죠. 여러 번 불러야 익숙해집니다.</p>
+        <p>하지만 <strong>너무 많이 부르면?</strong> 처음엔 잘 부르다가 <strong>과잉 학습</strong>이 돼서 오히려 뻣뻣하게 부를 수도 있어요. 감정 없이 기계적으로만요.</p>
+        <p>ACT 훈련도 똑같아요. <code>steps</code>는 <strong>훈련 반복 횟수</strong>입니다. 100,000번 = 로봇이 시연 데이터를 10만 번 훑어보며 배웁니다.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">📚</div>
+        <div class="analogy-body">
+          <strong>비유: 시험 공부</strong> — 너무 적게 공부하면 <strong>모르는 게 많고(과소학습)</strong>, 너무 많이 공부하면 <strong>답만 외워버려요(과적합)</strong>. 
+          시험에서 조금만 문제가 바뀌면 못 풀죠. 로봇도 훈련을 너무 많이 하면 시연한 상황에서만 잘하고, 새 상황에서는 헤맵니다.
+        </div>
+      </div>
+
+      <div class="range-vis">
+        <div class="range-title">🎯 시연 개수에 따른 적정 steps</div>
+        <div class="range-bar">
+          <div class="range-cell rc-small">
+            <div class="rc-label">시연 20~50개</div>
+            <div class="rc-val">30K~50K</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 시연 100개</div>
+            <div class="rc-val">80K~100K</div>
+          </div>
+          <div class="range-cell rc-big">
+            <div class="rc-label">시연 200개+</div>
+            <div class="rc-val">150K~200K</div>
+          </div>
+        </div>
+        <div class="range-note">
+          <span>← 데이터 적으면 짧게</span>
+          <span>데이터 많으면 길게 →</span>
+        </div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">🌟 실전 팁 — 체크포인트 활용</div>
+        <div class="re-body">
+          <strong>eval_freq=2000, save_freq=2000</strong> 이 두 값이 정말 중요해요!<br>
+          이건 <strong>"2,000번마다 성능 평가하고 저장해"</strong>라는 뜻입니다.<br>
+          100,000/2,000 = <strong>50개의 체크포인트</strong>가 저장돼요. 
+          이 중에서 <strong>loss가 가장 낮았던 체크포인트</strong>를 골라 쓰는 게 실전 요령입니다. 
+          꼭 마지막 체크포인트가 최고인 건 아니에요!
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"데이터 적음 → 짧게, 데이터 많음 → 길게"가 기본. 그리고 <strong>중간 체크포인트를 꼭 저장</strong>해서 최적점을 찾으세요. 100,000 스텝은 넉넉한 설정이지만, 과적합이 시작되면 <strong>더 앞의 체크포인트가 진짜 정답</strong>일 수 있어요.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="05" style="--pc:var(--p5);--pcl:var(--p5l);">
+      <div class="p-head">
+        <div class="p-num">5</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">한 걸음의 크기</div>
+          <div class="p-title">📈 learning_rate — 얼마나 크게 발자국을 뗄까?</div>
+          <div class="p-code">--policy.optimizer_lr=1e-4 --policy.optimizer_lr_backbone=0.0</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 산 정상에 오르려고 해요. 어떻게 걸어야 할까요?</p>
+        <p><strong>발자국이 너무 크면(learning_rate 큼)</strong>: 성큼성큼 뛰다가 정상을 지나쳐버려요! 뒤로 갔다가 다시 앞으로... 계속 왔다갔다합니다.</p>
+        <p><strong>발자국이 너무 작으면(learning_rate 작음)</strong>: 살금살금 걷다가 하루 종일 걸어도 정상 근처에도 못 가요.</p>
+        <p><strong>딱 알맞은 발자국(1e-4 = 0.0001)</strong>이 있어요. 이게 ACT 학습의 표준 크기입니다.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🎯</div>
+        <div class="analogy-body">
+          <strong>비유: 다트 던지기</strong> — 목표(정답)에서 멀 때는 <strong>크게 조준을 바꾸고</strong>, 가까워지면 <strong>미세하게</strong> 조정하죠. 
+          그런데 처음부터 너무 크게 바꾸면 판 밖으로 나가요. 그렇다고 너무 작게 바꾸면 100번 던져도 목표에 못 맞아요. 
+          <strong>이 "조준 변화의 크기"가 learning_rate</strong>입니다.
+        </div>
+      </div>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 860 240" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+          <text x="430" y="25" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">🏔️ learning_rate에 따른 학습 궤적</text>
+
+          <path d="M 50 200 Q 200 120 350 200" stroke="#94A3B8" stroke-width="2" fill="#F1F5F9"/>
+          <text x="200" y="115" font-size="18" text-anchor="middle">⛰️</text>
+          <text x="200" y="220" font-size="10" text-anchor="middle" fill="#64748B">1e-3 (너무 큼)</text>
+
+          <circle cx="80" cy="190" r="5" fill="#DC2626"/>
+          <circle cx="180" cy="140" r="5" fill="#DC2626"/>
+          <circle cx="280" cy="150" r="5" fill="#DC2626"/>
+          <circle cx="340" cy="195" r="5" fill="#DC2626"/>
+          <path d="M 80 190 L 180 140 L 280 150 L 340 195" stroke="#DC2626" stroke-width="2" fill="none" stroke-dasharray="4,3"/>
+
+          <path d="M 380 200 Q 530 120 680 200" stroke="#94A3B8" stroke-width="2" fill="#F0FDF4"/>
+          <text x="530" y="115" font-size="18" text-anchor="middle">⛰️</text>
+          <text x="530" y="220" font-size="10" text-anchor="middle" fill="#047857" font-weight="700">1e-4 (딱 좋음) ✅</text>
+
+          <circle cx="410" cy="195" r="4" fill="#059669"/>
+          <circle cx="450" cy="170" r="4" fill="#059669"/>
+          <circle cx="490" cy="145" r="4" fill="#059669"/>
+          <circle cx="530" cy="128" r="6" fill="#059669" stroke="#065F46" stroke-width="2"/>
+          <path d="M 410 195 L 450 170 L 490 145 L 530 128" stroke="#059669" stroke-width="2" fill="none"/>
+
+          <path d="M 710 200 Q 770 130 830 200" stroke="#94A3B8" stroke-width="2" fill="#F1F5F9"/>
+          <text x="770" y="220" font-size="10" text-anchor="middle" fill="#64748B">1e-6 (너무 작음)</text>
+          <circle cx="720" cy="198" r="3" fill="#CA8A04"/>
+          <circle cx="728" cy="195" r="3" fill="#CA8A04"/>
+          <circle cx="735" cy="193" r="3" fill="#CA8A04"/>
+          <circle cx="742" cy="190" r="3" fill="#CA8A04"/>
+          <text x="770" y="180" font-size="10" text-anchor="middle" fill="#78350F">아직도...</text>
+        </svg>
+        <div class="diagram-caption">1e-3: 지나침 (오버슈트) / 1e-4: 딱 좋음 (정상 도달) / 1e-6: 너무 느림 (정상 못 감)</div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">⚠️ 백본 학습률 (lr_backbone=0.0)</div>
+        <div class="re-body">
+          지금 설정에서 <code>optimizer_lr_backbone=0.0</code>은 <strong>"로봇의 눈(ResNet18)은 학습하지 마"</strong>라는 뜻이에요! 
+          이미 ImageNet으로 잘 학습된 상태 그대로 씁니다.<br><br>
+          <strong>🚨 주의</strong>: 만약 <strong>비슷한 색깔 물체를 구분</strong>해야 한다면(빨간 인형 vs 분홍 인형), 
+          이 값을 <strong>1e-5로 살짝 풀어주는 게</strong> 좋아요. 눈을 아주 조금이라도 훈련시켜야 색을 잘 봅니다.
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body"><strong>1e-4는 ACT의 황금 학습률.</strong> 함부로 바꾸지 마세요. 다만 <strong>lr_backbone=0.0</strong>은 상황에 따라 <strong>1e-5로 조정</strong>할 수 있어요 — 특히 색상 구분이 중요할 때!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="06" style="--pc:var(--p6);--pcl:var(--p6l);">
+      <div class="p-head">
+        <div class="p-num">6</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">로봇의 눈</div>
+          <div class="p-title">👁️ vision_backbone — 로봇에게 어떤 안경을 씌울까?</div>
+          <div class="p-code">--policy.vision_backbone=resnet18</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>로봇도 우리처럼 <strong>안경</strong>이 필요해요! 이 안경으로 카메라 영상을 이해합니다. 이 안경 종류가 바로 <strong>backbone</strong>이에요.</p>
+        <p>안경 종류가 여러 개 있어요:</p>
+        <p>👓 <strong>ResNet18 (가벼운 안경)</strong>: 얇고 빨라요. 대부분 잘 봅니다. ← 지금 선택!<br>
+        👓 <strong>ResNet34 (조금 무거운 안경)</strong>: 좀 더 자세히 봐요. 대신 느립니다.<br>
+        👓 <strong>ResNet50 (두꺼운 안경)</strong>: 아주 자세히 봅니다. 대신 무겁고 뜨거워요.</p>
+        <p>단순한 작업(인형 집기)에는 가벼운 안경이 딱 맞아요. <strong>복잡한 작업일수록 두꺼운 안경</strong>이 필요합니다.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🚗</div>
+        <div class="analogy-body">
+          <strong>비유: 차의 엔진</strong> — 시내 주행에는 <strong>소형차 엔진(ResNet18)</strong>이 딱 좋아요. 
+          연비 좋고, 주차 쉬워요. 
+          그런데 오프로드나 무거운 짐(카메라 3대, 복잡한 태스크)이 있으면 <strong>대형차 엔진(ResNet50)</strong>이 필요합니다. 
+          작업에 맞는 엔진을 골라야 해요.
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="cmp-side cmp-bad">
+          <div class="cmp-label">🐢 ResNet50 (무거움)</div>
+          <div class="cmp-content">
+            🔴 학습이 3~5배 느림<br>
+            🔴 VRAM(그래픽 메모리) 많이 씀<br>
+            🔴 카메라 여러 대면 4090에서도 위험<br>
+            ✅ 대신 복잡한 시각 이해 가능
+          </div>
+        </div>
+        <div class="cmp-side cmp-good">
+          <div class="cmp-label">🐇 ResNet18 (가벼움)</div>
+          <div class="cmp-content">
+            💚 학습 빠름<br>
+            💚 VRAM 여유 있음<br>
+            💚 SO-101 픽앤플레이스 충분<br>
+            💚 <strong>대부분 태스크에 최적</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">💡 ImageNet 사전학습이란?</div>
+        <div class="re-body">
+          <code>pretrained_backbone_weights=ResNet18_Weights.IMAGENET1K_V1</code>는 
+          <strong>"ImageNet이라는 거대한 사진 데이터셋으로 미리 훈련된 안경"</strong>을 쓴다는 뜻이에요. 
+          공짜로 <strong>"일반적인 물체를 알아보는 능력"</strong>을 얻습니다. 
+          이걸 안 쓰고 처음부터 훈련하면 몇 배 오래 걸려요!
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"<strong>카메라 대수 × 백본 크기 = VRAM 사용량</strong>"이 기본 공식. RTX 4090 카메라 3대면 ResNet18까지가 안전. ResNet50은 위험해요! 반드시 <strong>사전학습 가중치</strong> 사용하세요.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="07" style="--pc:var(--p7);--pcl:var(--p7l);">
+      <div class="p-head">
+        <div class="p-num">7</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">두뇌의 크기</div>
+          <div class="p-title">🧠 dim_model — 로봇 두뇌를 얼마나 크게 만들까?</div>
+          <div class="p-code">--policy.dim_model=384 --policy.dim_feedforward=1024</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>사람 뇌가 클수록 똑똑할까요? 꼭 그렇진 않아요. 하지만 <strong>기억할 게 많으면 더 큰 뇌가 유리</strong>합니다.</p>
+        <p>ACT의 두뇌(Transformer)도 크기가 있어요. <code>dim_model=384</code>는 두뇌의 <strong>기본 크기</strong>, <code>dim_feedforward=1024</code>는 <strong>생각하는 워크스페이스</strong>의 크기입니다.</p>
+        <p>단순한 작업이면 작은 두뇌로도 충분해요. 복잡한 작업일수록 큰 두뇌가 필요합니다.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">📔</div>
+        <div class="analogy-body">
+          <strong>비유: 노트 크기</strong> — <code>dim_model</code>은 노트의 <strong>페이지 수</strong>, <code>dim_feedforward</code>는 <strong>필기할 여백</strong>입니다. 
+          간단한 메모는 작은 노트로 충분하지만, 복잡한 프로젝트는 큰 노트가 필요해요. 
+          너무 큰 노트를 사면 무거워서 들고 다니기 힘들죠(=학습 느림, VRAM 부족).
+        </div>
+      </div>
+
+      <div class="range-vis">
+        <div class="range-title">🎯 dim_model 값 선택 가이드</div>
+        <div class="range-bar">
+          <div class="range-cell rc-small">
+            <div class="rc-label">경량</div>
+            <div class="rc-val">256</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 현재값</div>
+            <div class="rc-val">384</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 논문 기본</div>
+            <div class="rc-val">512</div>
+          </div>
+          <div class="range-cell rc-big">
+            <div class="rc-label">큰 태스크</div>
+            <div class="rc-val">768+</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"단순 → 작게, 복잡 → 크게"가 기본. <strong>dim_feedforward는 보통 dim_model × 4</strong>가 규칙(384×4=1536, 지금 1024는 살짝 작음). 성능이 안 나오면 <strong>512/2048</strong>로 올려보세요.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="08" style="--pc:var(--p8);--pcl:var(--p8l);">
+      <div class="p-head">
+        <div class="p-num">8</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">두뇌의 깊이</div>
+          <div class="p-title">🏗️ encoder/decoder 층 개수</div>
+          <div class="p-code">--policy.n_encoder_layers=3 --policy.n_decoder_layers=1</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>여러분이 종이접기를 할 때, <strong>몇 번 접느냐</strong>에 따라 결과가 달라져요. 
+          한 번 접으면 반쪽, 세 번 접으면 8등분... 층이 많을수록 <strong>더 복잡한 모양</strong>을 만들 수 있죠.</p>
+        <p>ACT 두뇌도 층으로 되어 있어요:</p>
+        <p>👀 <strong>인코더(3층)</strong>: <strong>보는 뇌</strong>. 카메라 영상과 로봇 상태를 이해합니다. 층이 많을수록 복잡한 시각 이해가 가능해요.</p>
+        <p>🖐️ <strong>디코더(1층)</strong>: <strong>움직이는 뇌</strong>. 실제로 팔을 어떻게 움직일지 결정합니다. ACT의 특징은 <strong>디코더가 얇다</strong>는 점이에요.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🥞</div>
+        <div class="analogy-body">
+          <strong>비유: 팬케이크 층수</strong> — 팬케이크 3층은 배부르고, 1층은 간식. 
+          ACT는 <strong>보는 팬케이크는 3층, 움직이는 팬케이크는 1층</strong>으로 만들어졌어요. 
+          "많이 보고 → 결정은 간단히"의 철학입니다. 시각은 복잡하지만 팔 움직임은 정확한 하나면 되니까요.
+        </div>
+      </div>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 860 240" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+          <text x="430" y="25" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">🧠 ACT의 인코더-디코더 구조 (비대칭)</text>
+
+          <rect x="30" y="90" width="90" height="60" rx="10" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/>
+          <text x="75" y="120" font-size="14" text-anchor="middle">📷</text>
+          <text x="75" y="140" font-size="10" text-anchor="middle" fill="#1D4ED8" font-weight="700">카메라 + 상태</text>
+
+          <path d="M 128 120 L 158 120" stroke="#94A3B8" stroke-width="2" marker-end="url(#am3)"/>
+
+          <rect x="165" y="60" width="200" height="130" rx="12" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2.5"/>
+          <text x="265" y="85" font-size="12" font-weight="900" text-anchor="middle" fill="#5B21B6">인코더 (3층)</text>
+          <text x="265" y="103" font-size="10" text-anchor="middle" fill="#6D28D9">👀 보는 뇌</text>
+          <rect x="185" y="115" width="160" height="18" rx="4" fill="#DDD6FE"/>
+          <text x="265" y="128" font-size="9" text-anchor="middle" fill="#4C1D95">1층: 기본 시각 처리</text>
+          <rect x="185" y="138" width="160" height="18" rx="4" fill="#C4B5FD"/>
+          <text x="265" y="151" font-size="9" text-anchor="middle" fill="#4C1D95">2층: 물체 관계 이해</text>
+          <rect x="185" y="161" width="160" height="18" rx="4" fill="#A78BFA"/>
+          <text x="265" y="174" font-size="9" text-anchor="middle" fill="white">3층: 종합 판단</text>
+
+          <path d="M 373 120 L 403 120" stroke="#94A3B8" stroke-width="2" marker-end="url(#am3)"/>
+
+          <rect x="410" y="90" width="180" height="60" rx="12" fill="#FEE2E2" stroke="#DC2626" stroke-width="2.5"/>
+          <text x="500" y="115" font-size="12" font-weight="900" text-anchor="middle" fill="#B91C1C">디코더 (1층)</text>
+          <text x="500" y="135" font-size="10" text-anchor="middle" fill="#991B1B">🖐️ 움직이는 뇌</text>
+
+          <path d="M 598 120 L 628 120" stroke="#94A3B8" stroke-width="2" marker-end="url(#am3)"/>
+
+          <rect x="635" y="90" width="185" height="60" rx="10" fill="#D1FAE5" stroke="#059669" stroke-width="2"/>
+          <text x="727" y="115" font-size="16" text-anchor="middle">🦾</text>
+          <text x="727" y="135" font-size="10" text-anchor="middle" fill="#047857" font-weight="700">50개 미래 동작</text>
+
+          <rect x="30" y="205" width="790" height="28" rx="6" fill="#FEF9C3"/>
+          <text x="425" y="223" font-size="10.5" text-anchor="middle" fill="#78350F" font-weight="700">🎯 핵심: "복잡하게 보고 → 간단하게 결정한다" - 이것이 ACT의 성공 비결</text>
+
+          <defs><marker id="am3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#94A3B8"/></marker></defs>
+        </svg>
+        <div class="diagram-caption">인코더는 많이(3층), 디코더는 얇게(1층) — 이 비대칭이 ACT의 트레이드마크</div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">🔬 논문 vs 현재 설정 비교</div>
+        <div class="re-body">
+          📄 <strong>ACT 논문 기본값</strong>: 인코더 4층 + 디코더 7층 (VAE 인코더 포함)<br>
+          🖥️ <strong>지금 설정</strong>: 인코더 3층 + 디코더 1층 → <strong>경량화된 실습용 버전</strong><br><br>
+          단순한 태스크(인형 집기)에는 지금 설정으로 충분해요. 
+          만약 <strong>복잡한 조작</strong>(용접, 조립)에서 성능이 안 나오면 <strong>인코더 4, 디코더 7</strong>로 늘려보세요.
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body"><strong>인코더는 두껍게, 디코더는 얇게</strong>가 ACT의 정신. 단순 태스크는 3/1로 충분, 복잡한 태스크는 4/7까지. 층을 늘리면 학습이 오래 걸린다는 것도 기억해요!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="09" style="--pc:var(--p9);--pcl:var(--p9l);">
+      <div class="p-head">
+        <div class="p-num">9</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">외우기 방지 훈련</div>
+          <div class="p-title">🎲 dropout — 로봇에게 눈가리개를 씌워 훈련</div>
+          <div class="p-code">--policy.dropout=0.1</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>축구 훈련할 때, 코치님이 가끔 <strong>한쪽 눈을 가리고</strong> 연습시켜요. 왜 그럴까요?</p>
+        <p>한 쪽 눈만으로도 잘하게 되면, <strong>양쪽 눈으로 하면 훨씬 잘하게</strong> 되거든요. 그리고 실전에서 뭔가 하나가 안 보여도 당황하지 않아요.</p>
+        <p><code>dropout=0.1</code>은 <strong>훈련할 때 로봇 뇌의 뉴런 10%를 무작위로 꺼버리는</strong> 규칙이에요. 로봇은 "어? 정보가 부족하네? 그래도 잘 해야지!"라고 배웁니다. 그 결과 <strong>더 튼튼한 로봇</strong>이 돼요.</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🕶️</div>
+        <div class="analogy-body">
+          <strong>비유: 시험 공부의 "함정 문제"</strong> — 평소에 어려운 함정 문제를 자주 풀면, 
+          실제 시험이 오히려 쉬워 보여요. 반대로 쉬운 문제만 풀면 시험에서 조금만 꼬여도 당황합니다. 
+          dropout은 로봇에게 <strong>일부러 어려운 훈련</strong>을 시키는 것과 같아요.
+        </div>
+      </div>
+
+      <div class="range-vis">
+        <div class="range-title">🎯 dropout 값에 따른 결과</div>
+        <div class="range-bar">
+          <div class="range-cell rc-small">
+            <div class="rc-label">너무 낮음</div>
+            <div class="rc-val">0.0~0.05</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 표준</div>
+            <div class="rc-val">0.1</div>
+          </div>
+          <div class="range-cell rc-good">
+            <div class="rc-label">💚 시연 적을 때</div>
+            <div class="rc-val">0.15~0.2</div>
+          </div>
+          <div class="range-cell rc-big">
+            <div class="rc-label">과함</div>
+            <div class="rc-val">0.3+</div>
+          </div>
+        </div>
+        <div class="range-note">
+          <span>← 과적합 위험</span>
+          <span>학습 자체가 안 됨 →</span>
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"<strong>시연 적음(30개 미만) → 0.15~0.2</strong>로 조금 높여요. <strong>시연 많음(100개+) → 0.05~0.1</strong>도 OK. <strong>0.3 이상은 절대 안 됨</strong> — 뇌가 너무 자주 꺼져서 학습이 아예 안 돼요!"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="p-card" data-num="10" style="--pc:var(--p10);--pcl:var(--p10l);">
+      <div class="p-head">
+        <div class="p-num">10</div>
+        <div class="p-title-block">
+          <div class="p-eyebrow">학습 속도의 시간 조절</div>
+          <div class="p-title">🎚️ scheduler 삼총사 — 발자국 크기의 시간 변화</div>
+          <div class="p-code">warmup=5000 · peak_lr=1e-4 · decay_lr=1e-6</div>
+        </div>
+      </div>
+
+      <div class="kids-story">
+        <div class="kids-story-title">🎈 이렇게 생각해봐요</div>
+        <p>피아노 연습을 시작할 때 <strong>바로 어려운 곡</strong>을 치면 손가락을 다쳐요. 
+          <strong>준비운동(warmup)</strong>부터 하고, 실력이 오르면 <strong>본격 훈련(peak)</strong>, 
+          마무리는 <strong>천천히 정리(decay)</strong>합니다.</p>
+        <p>ACT 학습도 똑같아요! 학습률(learning_rate)이 <strong>시간에 따라 변합니다</strong>:</p>
+        <p>🏃‍♀️ <strong>1단계 워밍업 (0~5,000 스텝)</strong>: 0에서 1e-4까지 서서히 올림. <strong>준비운동</strong>이에요.<br>
+        💪 <strong>2단계 최고속 (5,000 스텝 부근)</strong>: 1e-4로 <strong>본격 학습</strong>. 이때가 가장 빠르게 배워요.<br>
+        🧘 <strong>3단계 감속 (5,000 → 95,000 스텝)</strong>: 1e-4 → 1e-6로 <strong>부드럽게</strong> 감속. 미세 조정 단계!</p>
+      </div>
+
+      <div class="analogy-line">
+        <div class="analogy-ico">🚗</div>
+        <div class="analogy-body">
+          <strong>비유: 자동차 운전</strong> — 출발할 때 <strong>천천히 가속</strong>(워밍업)하고, 
+          큰길에서 <strong>최고 속도</strong>(peak)로 달리다가, 목적지에 가까워지면 <strong>서서히 감속</strong>(decay)하죠. 
+          갑자기 밟거나 갑자기 서면 사고 나요! 학습률도 부드러운 변화가 안전합니다.
+        </div>
+      </div>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans KR',sans-serif">
+          <text x="430" y="25" font-size="14" font-weight="900" text-anchor="middle" fill="#1E293B">📈 학습률의 시간 변화 (cosine_decay_with_warmup)</text>
+
+          <line x1="60" y1="180" x2="820" y2="180" stroke="#334155" stroke-width="1.5"/>
+          <line x1="60" y1="60" x2="60" y2="180" stroke="#334155" stroke-width="1.5"/>
+
+          <text x="55" y="70" font-size="10" text-anchor="end" fill="#64748B">1e-4 (peak)</text>
+          <text x="55" y="175" font-size="10" text-anchor="end" fill="#64748B">0</text>
+
+          <text x="120" y="200" font-size="9.5" text-anchor="middle" fill="#64748B">0</text>
+          <text x="200" y="200" font-size="9.5" text-anchor="middle" fill="#B45309" font-weight="700">5,000</text>
+          <text x="800" y="200" font-size="9.5" text-anchor="middle" fill="#B45309" font-weight="700">100,000</text>
+
+          <path d="M 60 180 L 200 70" stroke="#059669" stroke-width="3.5" fill="none"/>
+
+          <path d="M 200 70 Q 400 78 500 100 Q 650 145 780 170" stroke="#DC2626" stroke-width="3.5" fill="none"/>
+
+          <line x1="200" y1="60" x2="200" y2="180" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+
+          <rect x="80" y="105" width="120" height="24" rx="5" fill="#D1FAE5" stroke="#059669" stroke-width="1"/>
+          <text x="140" y="121" font-size="10" text-anchor="middle" fill="#047857" font-weight="700">🏃 워밍업</text>
+
+          <rect x="210" y="105" width="270" height="24" rx="5" fill="#FEE2E2" stroke="#DC2626" stroke-width="1"/>
+          <text x="345" y="121" font-size="10" text-anchor="middle" fill="#B91C1C" font-weight="700">💪 본격 학습 → 부드럽게 감속</text>
+
+          <rect x="490" y="105" width="290" height="24" rx="5" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+          <text x="635" y="121" font-size="10" text-anchor="middle" fill="#B45309" font-weight="700">🧘 미세 조정 (마지막까지)</text>
+
+          <path d="M 200 60 L 200 50" stroke="#DC2626" stroke-width="2"/>
+          <text x="200" y="45" font-size="10" text-anchor="middle" fill="#DC2626" font-weight="900">🎯 peak</text>
+        </svg>
+        <div class="diagram-caption">0~5,000: 워밍업 (녹색 상승) → 5,000~100,000: 코사인 감속 (빨강 하강)</div>
+      </div>
+
+      <div class="compare">
+        <div class="cmp-side cmp-bad">
+          <div class="cmp-label">❌ warmup 없이 시작하면</div>
+          <div class="cmp-content">
+            🔴 처음부터 1e-4로 <strong>쾅 시작</strong><br>
+            🔴 학습이 발산 (loss가 폭발)<br>
+            🔴 훈련 초반부터 망함
+          </div>
+        </div>
+        <div class="cmp-side cmp-good">
+          <div class="cmp-label">✅ warmup 5,000</div>
+          <div class="cmp-content">
+            💚 부드럽게 시작 → 안정<br>
+            💚 총 스텝의 5% = 표준<br>
+            💚 큰 학습률 사용 가능
+          </div>
+        </div>
+      </div>
+
+      <div class="real-example">
+        <div class="re-title">⚠️ 함정 주의!</div>
+        <div class="re-body">
+          지금 설정: <code>steps=100,000</code>, <code>num_decay_steps=95,000</code><br>
+          → 5,000(워밍업) + 95,000(감속) = <strong>100,000</strong> ✅ 딱 맞아요!<br><br>
+          <strong>🚨 자주 하는 실수</strong>: <code>num_decay_steps</code>가 <code>steps</code>보다 크면 에러 나요! 
+          그리고 너무 작으면 <strong>마지막 스텝이 학습률 0으로 멈춘 상태</strong>로 진행되니 주의하세요.
+        </div>
+      </div>
+
+      <div class="rule-box">
+        <div class="rule-label">📌 기억할 규칙</div>
+        <div class="rule-body">"<strong>워밍업은 총 스텝의 5~10%</strong>. peak는 1e-4 표준. decay 종점은 peak의 1/100." 
+        그리고 <strong>워밍업 + 감속 = 총 스텝</strong>이 되도록 계산 잘 하세요!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid var(--border);">
+  <div class="wrap">
+    <div class="sec-mark">문제 해결 가이드</div>
+    <h2 class="sec-heading">🚑 로봇이 이상해요! 어떤 손잡이를 돌릴까요?</h2>
+
+    <p>훈련 후 로봇이 잘 안 움직인다면, 아래 표에서 증상을 찾아 <strong>가장 먼저 만질 파라미터</strong>를 확인하세요.</p>
+
+    <table class="trouble-tbl">
+      <thead>
+        <tr>
+          <th>😵 증상</th>
+          <th>🎯 원인</th>
+          <th>🔧 해결책</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="tc-sym">비슷한 색 물체 구분 실패<br>(빨강 vs 분홍)</td>
+          <td>백본이 얼어있어서 색 학습 안 됨</td>
+          <td class="tc-fix">lr_backbone: 0 → 1e-5</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">동작이 뚝뚝 끊김<br>(덜덜 떨림)</td>
+          <td>재예측 주기가 너무 김 or 짧음</td>
+          <td class="tc-fix">n_action_steps: 20 → 15</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">동작이 흐물흐물<br>(정확도 낮음)</td>
+          <td>계획 길이 부족 or 다양성 부족</td>
+          <td class="tc-fix">chunk_size↑ or kl_weight 0.05</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">학습이 진동함<br>(loss 왔다갔다)</td>
+          <td>워밍업 부족</td>
+          <td class="tc-fix">warmup: 5,000 → 10,000</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">VRAM 부족<br>(OOM 에러)</td>
+          <td>두뇌가 너무 큼</td>
+          <td class="tc-fix">dim_model: 384 → 256</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">과적합<br>(훈련은 잘, 실전은 못)</td>
+          <td>너무 많이 훈련함 or dropout 부족</td>
+          <td class="tc-fix">dropout: 0.1 → 0.15</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">학습이 아예 안 됨<br>(loss 안 내려감)</td>
+          <td>학습률 문제</td>
+          <td class="tc-fix">optimizer_lr 확인 (1e-4 표준)</td>
+        </tr>
+        <tr>
+          <td class="tc-sym">복잡한 태스크 실패</td>
+          <td>두뇌 크기·깊이 부족</td>
+          <td class="tc-fix">dim_model 512, 층 4/7</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="rule-box" style="margin-top:1.5rem;">
+      <div class="rule-label">🎯 조련사의 지혜</div>
+      <div class="rule-body">
+        <strong>한 번에 하나씩만 바꾸세요!</strong> 
+        여러 개를 동시에 바꾸면 <strong>어느 게 효과 있었는지 알 수 없어요</strong>. 
+        과학자처럼 한 번에 한 변수만 조작하고 결과를 기록하세요. 이게 진짜 엔지니어의 태도입니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="final">
+      <h3>🎓 마지막 메시지</h3>
+      <div class="final-quote">
+        "파라미터는 <span style="color:#F59E0B;">손잡이</span>지 <span style="color:#F87171;">주문</span>이 아니에요.<br><br>
+        무슨 뜻인지 <strong>이해하고 돌려야</strong> 로봇이 원하는 대로 움직입니다.<br><br>
+        <span style="color:#22D3EE;">10개 손잡이를 모두 이해했다면</span>,<br>
+        당신은 이제 <span style="color:#A78BFA;">진짜 ACT 조련사</span>입니다."
+      </div>
+    </div>
+
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:2rem; text-align:center; margin-top:1.5rem;">
+      <div style="font-family:'Hahmlet',serif; font-size:1.1rem; font-weight:900; line-height:1.6; margin-bottom:1rem; color:#1E293B;">
+        📝 실습 팁: <strong style="color:#DC2626;">chunk_size</strong>부터 이해하고,<br>
+        <strong style="color:#059669;">learning_rate</strong>를 지켜보고,<br>
+        <strong style="color:#7C3AED;">체크포인트를 자주 저장</strong>하세요.
+      </div>
+      <div style="font-size:0.88rem; color:var(--muted);">이 3가지만 잘하면 대부분의 실패를 피할 수 있어요.</div>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#1E293B; color:white; padding:2.5rem 0; margin-top:2rem;">
+  <div class="wrap" style="text-align:center;">
+    <div style="font-family:'Hahmlet',serif; font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">ZETA Satellite Robotics</div>
+    <p style="color:#94A3B8; font-size:0.78rem; margin:0;">
+      ACT 파라미터 10가지 — 초등학생도 이해하는 로봇 조련사 가이드<br>
+      chunk_size부터 scheduler까지, 비유와 그림으로 풀어낸 실전 튜닝 매뉴얼
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
