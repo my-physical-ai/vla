@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeRobot v0.6.0 — 상상하고, 평가하고, 개선하라! - Physical AI Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary: #7C3AED;
+      --color-primary-light: #EDE9FE;
+      --color-primary-dark: #4C1D95;
+      --color-secondary: #2563EB;
+      --color-secondary-light: #DBEAFE;
+      --color-accent: #059669;
+      --color-accent-light: #D1FAE5;
+      --color-warning: #D97706;
+      --color-warning-light: #FEF3C7;
+      --color-danger: #DC2626;
+      --color-danger-light: #FEE2E2;
+      --color-surface: #F8FAFC;
+      --color-card: #FFFFFF;
+      --color-text: #1E293B;
+      --color-muted: #64748B;
+      --color-border: #E2E8F0;
+      --color-imagine: #7C3AED;
+      --color-evaluate: #059669;
+      --color-improve: #2563EB;
+      --color-ros: #0891B2;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--color-text);
+      background: var(--color-surface);
+      line-height: 1.75;
+    }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 3rem 0; }
+
+    /* === Hero === */
+    .hero {
+      background: linear-gradient(135deg, #4C1D95, #8B5CF6, #2563EB);
+      color: white;
+      padding: 4rem 0 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero .container { position: relative; z-index: 1; }
+    .hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .hero-tag {
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 900; line-height: 1.2; margin-bottom: 0.75rem; }
+    .hero-subtitle { font-size: 1.05rem; opacity: 0.92; line-height: 1.7; max-width: 680px; }
+    .hero-version {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.25rem;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* === Three Pillars Banner === */
+    .pillars-banner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .pillar-card {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+    .pillar-card .pillar-emoji { font-size: 2rem; margin-bottom: 0.3rem; }
+    .pillar-card .pillar-en { font-size: 0.75rem; opacity: 0.8; letter-spacing: 0.05em; text-transform: uppercase; }
+    .pillar-card .pillar-ko { font-weight: 700; font-size: 1rem; margin-top: 0.15rem; }
+
+    /* === Section Titles === */
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-title .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .section-desc {
+      color: var(--color-muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      padding-left: 3.2rem;
+    }
+
+    /* === Analogy Box === */
+    .analogy-box {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border-left: 4px solid var(--ab-color, var(--color-primary));
+      background: var(--ab-bg, var(--color-primary-light));
+    }
+    .analogy-icon { font-size: 2.5rem; flex-shrink: 0; }
+    .analogy-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--ab-color, var(--color-primary));
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .analogy-text { line-height: 1.7; color: var(--color-text); font-size: 0.95rem; }
+    .analogy-real {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--ab-color, var(--color-primary));
+      font-size: 0.9rem;
+      color: var(--color-muted);
+    }
+
+    /* === Flow Diagram (horizontal) === */
+    .flow-h {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 2rem 1rem;
+      background: var(--color-surface);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+      overflow-x: auto;
+    }
+    .flow-node {
+      background: var(--color-card);
+      border: 2px solid var(--nc, var(--color-primary));
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      min-width: 120px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .flow-node:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+    .flow-node-icon { font-size: 1.8rem; margin-bottom: 0.3rem; }
+    .flow-node-title { font-weight: 700; font-size: 0.85rem; }
+    .flow-node-desc { font-size: 0.75rem; color: var(--color-muted); margin-top: 0.15rem; }
+    .flow-arrow { flex-shrink: 0; }
+    .flow-arrow svg { display: block; }
+
+    /* === Vertical Flow === */
+    .vflow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 2rem;
+      background: var(--color-surface);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+    }
+    .vflow-node {
+      width: 100%;
+      max-width: 540px;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 2px solid var(--nc, var(--color-primary));
+      background: var(--color-card);
+      transition: transform 0.2s;
+    }
+    .vflow-node:hover { transform: scale(1.02); }
+    .vflow-node .nn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--nc, var(--color-primary));
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+    .vflow-node .sub {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--color-muted);
+      margin-top: 0.3rem;
+    }
+    .vflow-arrow { color: var(--color-muted); font-size: 1.4rem; padding: 0.15rem 0; line-height: 1; }
+
+    /* === Compare Grid === */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .compare-card {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      background: var(--color-card);
+    }
+    .compare-header {
+      padding: 1.15rem;
+      color: white;
+      text-align: center;
+    }
+    .compare-header h4 { margin: 0.4rem 0 0; font-size: 1.05rem; }
+    .compare-icon { font-size: 1.8rem; }
+    .compare-body { padding: 1rem; }
+    .ci {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--color-border);
+      gap: 0.5rem;
+    }
+    .ci:last-child { border-bottom: none; }
+    .cl { color: var(--color-muted); font-size: 0.82rem; }
+    .cv { font-weight: 700; color: var(--color-text); font-size: 0.85rem; text-align: right; }
+
+    /* === Stat Grid === */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--color-card);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--color-border);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-number { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+    .stat-label { font-weight: 700; font-size: 0.8rem; margin-top: 0.5rem; }
+    .stat-desc { font-size: 0.72rem; color: var(--color-muted); margin-top: 0.25rem; }
+
+    /* === Callout === */
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.25rem; flex-shrink: 0; padding-top: 0.1rem; }
+    .callout-content { font-size: 0.92rem; line-height: 1.6; }
+    .callout-tip { background: var(--color-accent-light); border-left: 3px solid var(--color-accent); }
+    .callout-warning { background: var(--color-warning-light); border-left: 3px solid var(--color-warning); }
+    .callout-info { background: var(--color-secondary-light); border-left: 3px solid var(--color-secondary); }
+    .callout-danger { background: var(--color-danger-light); border-left: 3px solid var(--color-danger); }
+
+    /* === World Model Cards === */
+    .wm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+    }
+    .wm-card {
+      background: var(--color-card);
+      border-radius: 14px;
+      padding: 1.5rem;
+      border: 2px solid var(--color-border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .wm-card:hover { transform: translateY(-4px); border-color: var(--color-primary); }
+    .wm-card-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+    .wm-card-name { font-weight: 900; font-size: 1.1rem; color: var(--color-primary); margin-bottom: 0.3rem; }
+    .wm-card-desc { font-size: 0.88rem; color: var(--color-text); line-height: 1.65; }
+    .wm-card-tag {
+      display: inline-block;
+      margin-top: 0.75rem;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* === VLA Zoo Grid === */
+    .vla-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+    .vla-chip {
+      background: var(--color-card);
+      border: 2px solid var(--color-border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .vla-chip:hover { transform: translateY(-3px); border-color: var(--color-secondary); }
+    .vla-chip-emoji { font-size: 1.4rem; }
+    .vla-chip-name { font-weight: 700; font-size: 0.85rem; margin-top: 0.3rem; }
+    .vla-chip-info { font-size: 0.72rem; color: var(--color-muted); margin-top: 0.15rem; }
+
+    /* === Arch Diagram === */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 2rem;
+      background: var(--color-surface);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+    }
+    .arch-layer {
+      width: 100%;
+      max-width: 620px;
+      background: color-mix(in srgb, var(--lc) 8%, white);
+      border: 2px solid var(--lc);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .arch-layer-label {
+      font-weight: 700;
+      color: var(--lc);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .arch-boxes { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .arch-box {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    .arch-connector { color: var(--color-muted); font-size: 1.2rem; padding: 0.25rem 0; line-height: 1; }
+
+    /* === Benchmark Grid === */
+    .bench-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .bench-card {
+      background: var(--color-card);
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .bench-card-name { font-weight: 700; font-size: 1rem; color: var(--color-evaluate); margin-bottom: 0.3rem; }
+    .bench-card-desc { font-size: 0.85rem; color: var(--color-muted); line-height: 1.5; }
+    .bench-card-stat {
+      margin-top: 0.6rem;
+      display: inline-block;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    /* === Accordion === */
+    .accordion { border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--color-surface);
+      user-select: none;
+      font-size: 0.95rem;
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 1.25rem;
+    }
+    .accordion-toggle:checked ~ .accordion-body { max-height: 3000px; padding: 1rem 1.25rem; }
+    .accordion-toggle:checked ~ .accordion-header .accordion-chevron { transform: rotate(90deg); }
+    .accordion-chevron { transition: transform 0.2s; font-size: 0.9rem; }
+
+    /* === Timeline / Roadmap === */
+    .timeline {
+      position: relative;
+      padding-left: 2.5rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--color-imagine), var(--color-evaluate), var(--color-improve));
+      border-radius: 2px;
+    }
+    .tl-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-card);
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+    }
+    .tl-item::before {
+      content: attr(data-ver);
+      position: absolute;
+      left: -2.5rem;
+      top: 1rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--tc, var(--color-primary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 700;
+      z-index: 1;
+    }
+    .tl-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+    .tl-desc { font-size: 0.88rem; color: var(--color-muted); }
+
+    /* === Big Loop Diagram === */
+    .loop-wrapper {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .loop-svg { max-width: 100%; height: auto; }
+
+    /* === Footer === */
+    .footer {
+      background: var(--color-primary-dark);
+      color: rgba(255,255,255,0.7);
+      padding: 2rem 0;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .footer strong { color: white; }
+
+    /* === Utilities === */
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 1.5rem; }
+    .mt-3 { margin-top: 2rem; }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.75rem; }
+      .pillars-banner { grid-template-columns: 1fr; }
+      .section-title { font-size: 1.35rem; }
+      .flow-h { flex-direction: column; }
+      .flow-arrow svg { transform: rotate(90deg); }
+      .compare-grid, .wm-grid { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .bench-grid { grid-template-columns: 1fr; }
+      .vla-grid { grid-template-columns: repeat(2, 1fr); }
+      .analogy-box { flex-direction: column; }
+      .analogy-icon { font-size: 2rem; }
+      .section-desc { padding-left: 0; }
+    }
+
+    @media print {
+      .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .flow-node:hover, .vflow-node:hover, .stat-card:hover, .wm-card:hover { transform: none; }
+      .accordion-body { max-height: none !important; padding: 1rem !important; }
+      section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HERO ==================== -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-tags">
+        <span class="hero-tag">LeRobot</span>
+        <span class="hero-tag">v0.6.0</span>
+        <span class="hero-tag">World Model</span>
+        <span class="hero-tag">Reward Model</span>
+        <span class="hero-tag">DAgger</span>
+        <span class="hero-tag">Hugging Face</span>
+      </div>
+      <h1>LeRobot v0.6.0<br>상상하고, 평가하고, 개선하라!</h1>
+      <p class="hero-subtitle">
+        로봇이 행동하기 전에 "미래를 상상"하고, 성공했는지 "스스로 평가"하고,
+        실패하면 사람의 도움을 받아 "스스로 개선"하는 — 로봇 학습의 완전한 순환 고리를 완성한 역대 최대 업데이트!
+      </p>
+      <div class="hero-version">📅 2026년 7월 7일 공개 · Hugging Face</div>
+
+      <!-- Three Pillars -->
+      <div class="pillars-banner">
+        <div class="pillar-card">
+          <div class="pillar-emoji">🌍</div>
+          <div class="pillar-en">Imagine</div>
+          <div class="pillar-ko">상상하라</div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-emoji">🏅</div>
+          <div class="pillar-en">Evaluate</div>
+          <div class="pillar-ko">평가하라</div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-emoji">🔄</div>
+          <div class="pillar-en">Improve</div>
+          <div class="pillar-ko">개선하라</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== OVERVIEW: The Learning Loop ==================== -->
+  <section>
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-primary)">0</span> 핵심 개념: 로봇 학습 순환 고리</h2>
+      <p class="section-desc">v0.6.0은 로봇이 스스로 배우는 "순환 고리"를 완성했습니다. 마치 사람이 시험 → 채점 → 오답 노트 → 다시 시험하는 것처럼요!</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-primary); --ab-bg: var(--color-primary-light);">
+        <div class="analogy-icon">📝</div>
+        <div>
+          <div class="analogy-title">시험 공부에 비유하면!</div>
+          <p class="analogy-text">
+            여러분이 수학 시험 공부를 한다고 상상해 보세요.<br>
+            <strong>① 상상(Imagine)</strong> — 문제를 풀기 전에 "이렇게 풀면 답이 나올까?" 머릿속으로 미리 생각해봐요<br>
+            <strong>② 평가(Evaluate)</strong> — 답을 쓴 뒤 채점해서 맞았는지 확인해요<br>
+            <strong>③ 개선(Improve)</strong> — 틀린 문제는 오답노트를 쓰고, 다시 풀어봐요
+          </p>
+          <p class="analogy-real">
+            💡 <strong>로봇도 똑같아요!</strong> — 행동 전에 미래를 예측하고(World Model), 성공 여부를 자동 채점하고(Reward Model), 실패한 부분은 사람이 교정해주면 다시 학습합니다(DAgger).
+          </p>
+        </div>
+      </div>
+
+      <!-- Loop Diagram -->
+      <div class="loop-wrapper mt-2">
+        <svg class="loop-svg" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Arrows & Loop -->
+          <defs>
+            <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6Z" fill="#64748B"/></marker>
+          </defs>
+          <!-- Top arrow -->
+          <path d="M170 60 L320 60" stroke="#64748B" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+          <path d="M450 60 L580 60" stroke="#64748B" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+          <!-- Bottom return arrow -->
+          <path d="M600 100 C650 100 670 160 600 170 L130 170 C60 170 60 100 120 100" stroke="#64748B" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ah)"/>
+
+          <!-- Box 1: Imagine -->
+          <rect x="30" y="30" width="140" height="70" rx="14" fill="#EDE9FE" stroke="#7C3AED" stroke-width="2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="20" font-weight="900" fill="#7C3AED">🌍</text>
+          <text x="100" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#4C1D95">상상 (Imagine)</text>
+
+          <!-- Box 2: Act -->
+          <rect x="330" y="30" width="120" height="70" rx="14" fill="#DBEAFE" stroke="#2563EB" stroke-width="2"/>
+          <text x="390" y="55" text-anchor="middle" font-size="20" font-weight="900" fill="#2563EB">🦾</text>
+          <text x="390" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#1E40AF">행동 (Act)</text>
+
+          <!-- Box 3: Evaluate -->
+          <rect x="460" y="30" width="140" height="70" rx="14" fill="#D1FAE5" stroke="#059669" stroke-width="2"/>
+          <text x="530" y="55" text-anchor="middle" font-size="20" font-weight="900" fill="#059669">🏅</text>
+          <text x="530" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#064E3B">평가 (Evaluate)</text>
+
+          <!-- Bottom: Improve -->
+          <rect x="280" y="140" width="160" height="50" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+          <text x="360" y="163" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">🔄 개선 (Improve)</text>
+          <text x="360" y="180" text-anchor="middle" font-size="10" fill="#92400E">실패 → 교정 → 재학습</text>
+
+          <!-- Labels on arrows -->
+          <text x="245" y="52" text-anchor="middle" font-size="9" fill="#64748B">미래 예측</text>
+          <text x="515" y="52" text-anchor="middle" font-size="9" fill="#64748B">성공 채점</text>
+          <text x="360" y="130" text-anchor="middle" font-size="9" fill="#64748B">오답노트 → 다시 학습</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 1. IMAGINE — World Models ==================== -->
+  <section style="background: white;">
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-imagine)">1</span> 🌍 상상하라 — 월드 모델 (World Model)</h2>
+      <p class="section-desc">"행동하기 전에 미래를 먼저 상상하는" 로봇 정책 3종이 추가되었습니다</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-imagine); --ab-bg: var(--color-primary-light);">
+        <div class="analogy-icon">🧠</div>
+        <div>
+          <div class="analogy-title">쉽게 이해하기!</div>
+          <p class="analogy-text">
+            바둑이나 장기를 둘 때, 고수는 돌을 놓기 전에 <strong>"이 수를 두면 다음에 상대가 이렇게 나올 거고…"</strong> 하고 여러 수 앞을 머릿속으로 미리 시뮬레이션합니다.
+            월드 모델도 같은 원리예요! 로봇이 <strong>"컵을 잡으면 다음에 이렇게 될 거야"</strong>라고 미래를 상상한 뒤, 가장 좋은 행동을 선택합니다.
+          </p>
+          <p class="analogy-real">
+            💡 <strong>핵심 질문</strong> — "월드 모델이 정말 로봇 정책에 도움이 될까?" v0.6.0은 이 질문에 답하기 위해 3가지 다른 접근법을 제공합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- World Model Cards -->
+      <div class="wm-grid mt-2">
+        <div class="wm-card">
+          <div class="wm-card-emoji">🎯</div>
+          <div class="wm-card-name">VLA-JEPA</div>
+          <div class="wm-card-desc">
+            훈련할 때는 미래를 예측하는 월드 모델이 함께 공부하지만,
+            실제 로봇에서 사용할 때는 <strong>월드 모델을 제거</strong>합니다.
+            마치 시험 볼 때는 참고서 없이 실력만으로 푸는 것처럼!
+          </div>
+          <span class="wm-card-tag">추론 비용 제로</span>
+        </div>
+        <div class="wm-card">
+          <div class="wm-card-emoji">🎬</div>
+          <div class="wm-card-name">LingBot-VA</div>
+          <div class="wm-card-desc">
+            미래 영상과 행동을 <strong>한 묶음씩(Chunk)</strong> 예측합니다.
+            상상한 영상과 실제 영상을 비교할 수도 있어요!
+            "로봇이 뭘 상상했는지" 직접 볼 수 있는 유일한 모델.
+          </div>
+          <span class="wm-card-tag">영상 예측 저장 가능</span>
+        </div>
+        <div class="wm-card">
+          <div class="wm-card-emoji">💭</div>
+          <div class="wm-card-name">FastWAM</div>
+          <div class="wm-card-desc">
+            ~50억 파라미터의 영상 생성 전문가가 훈련 중 "꿈을 꿉니다."
+            실제 사용할 때는 <strong>꿈꾸기를 건너뛰고</strong> 바로 행동합니다.
+            훈련의 상상력 + 실행의 속도를 동시에!
+          </div>
+          <span class="wm-card-tag">~5B 파라미터</span>
+        </div>
+      </div>
+
+      <div class="callout callout-tip mt-2">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong>공통점:</strong> 세 모델 모두 <strong>훈련할 때는 미래를 상상하지만, 실제 로봇에서는 상상을 건너뛰어</strong> 추가 비용 없이 빠르게 행동합니다. 상상은 "더 좋은 뇌를 만드는 훈련법"이지, "느려지는 원인"이 아닙니다!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. VLA Zoo ==================== -->
+  <section>
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-secondary)">2</span> 🤖 VLA 동물원 — 모델이 더 많아졌어요!</h2>
+      <p class="section-desc">Vision-Language-Action 모델 5종이 새로 추가! 눈(Vision) + 말(Language) + 행동(Action)을 모두 이해하는 AI</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-secondary); --ab-bg: var(--color-secondary-light);">
+        <div class="analogy-icon">🦁</div>
+        <div>
+          <div class="analogy-title">동물원처럼 다양하게!</div>
+          <p class="analogy-text">
+            동물원에 사자, 코끼리, 펭귄이 각각 다른 능력이 있듯이,
+            VLA 모델도 <strong>크기, 속도, 특기가 각각 달라요</strong>.
+            작은 로봇에는 작은 모델을, 복잡한 작업에는 큰 모델을 골라 쓸 수 있습니다!
+          </p>
+        </div>
+      </div>
+
+      <div class="vla-grid mt-2">
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">🏆</div>
+          <div class="vla-chip-name">GR00T N1.7</div>
+          <div class="vla-chip-info">NVIDIA · 3B · 범용</div>
+        </div>
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">🎯</div>
+          <div class="vla-chip-name">MolmoAct2</div>
+          <div class="vla-chip-info">Allen AI · 12GB · 즉시 배포</div>
+        </div>
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">🔬</div>
+          <div class="vla-chip-name">EO-1</div>
+          <div class="vla-chip-info">Qwen2.5-VL-3B 백본</div>
+        </div>
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">🎨</div>
+          <div class="vla-chip-name">Multitask DiT</div>
+          <div class="vla-chip-info">~450M · 다중 작업</div>
+        </div>
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">⚡</div>
+          <div class="vla-chip-name">EVO1</div>
+          <div class="vla-chip-info">0.77B · 초경량</div>
+        </div>
+        <div class="vla-chip">
+          <div class="vla-chip-emoji">📦</div>
+          <div class="vla-chip-name">SmolVLA</div>
+          <div class="vla-chip-info">기존 · ~450M · 기본 모델</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info mt-2">
+        <div class="callout-icon">📌</div>
+        <div class="callout-content">
+          <strong>MolmoAct2 주목!</strong> SO-100/101 로봇에서 <strong>추가 학습 없이 바로(Zero-shot)</strong> 사용 가능합니다. "빨간 큐브를 집어" 같은 자연어 명령만 주면 됩니다. VRAM 12GB면 충분!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 3. EVALUATE — Reward Models ==================== -->
+  <section style="background: white;">
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-evaluate)">3</span> 🏅 평가하라 — 보상 모델 (Reward Model)</h2>
+      <p class="section-desc">"로봇이 성공했는지" 자동으로 채점해주는 AI가 추가되었습니다</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-evaluate); --ab-bg: var(--color-accent-light);">
+        <div class="analogy-icon">✅</div>
+        <div>
+          <div class="analogy-title">자동 채점기!</div>
+          <p class="analogy-text">
+            시험지를 채점할 때, 선생님이 한 문제씩 ○×를 매기죠?
+            보상 모델은 <strong>로봇의 행동 영상을 보고 "성공! 90점!" 같이 자동으로 점수를 매깁니다</strong>.
+            사람이 일일이 보지 않아도 수천 개의 로봇 행동을 자동으로 평가할 수 있어요!
+          </p>
+          <p class="analogy-real">
+            💡 <strong>왜 중요할까?</strong> — 로봇 학습에서 가장 어려운 부분 중 하나가 "이 행동이 성공인지 실패인지 판단하는 것"이었습니다. 보상 모델이 이 문제를 해결합니다.
+          </p>
+        </div>
+      </div>
+
+      <div class="compare-grid mt-2">
+        <div class="compare-card">
+          <div class="compare-header" style="background: var(--color-evaluate)">
+            <span class="compare-icon">📊</span>
+            <h4>Robometer</h4>
+          </div>
+          <div class="compare-body">
+            <div class="ci"><span class="cl">기반 모델</span><span class="cv">Qwen3-VL-4B</span></div>
+            <div class="ci"><span class="cl">학습 데이터</span><span class="cv">100만+ 궤적</span></div>
+            <div class="ci"><span class="cl">입력</span><span class="cv">영상 + 언어 명령</span></div>
+            <div class="ci"><span class="cl">특징</span><span class="cv">범용 · 사전학습됨</span></div>
+            <div class="ci"><span class="cl">비유</span><span class="cv">경험 많은 채점관</span></div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-header" style="background: var(--color-warning)">
+            <span class="compare-icon">🎲</span>
+            <h4>TOPReward</h4>
+          </div>
+          <div class="compare-body">
+            <div class="ci"><span class="cl">기반 모델</span><span class="cv">Qwen3-VL (범용 VLM)</span></div>
+            <div class="ci"><span class="cl">학습 데이터</span><span class="cv">없음! (Zero-shot)</span></div>
+            <div class="ci"><span class="cl">입력</span><span class="cv">영상 + 언어 명령</span></div>
+            <div class="ci"><span class="cl">특징</span><span class="cv">"True" 확률로 판단</span></div>
+            <div class="ci"><span class="cl">비유</span><span class="cv">상식으로 판단하는 심사관</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. EVALUATE — Benchmarks ==================== -->
+  <section>
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-evaluate)">4</span> 🎯 시뮬레이션 벤치마크 6종 — 하나의 명령으로!</h2>
+      <p class="section-desc">로봇 정책의 실력을 측정하는 "시험장" 6곳이 새로 생겼습니다. 모두 <code>lerobot-eval</code> 하나로 실행!</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-evaluate); --ab-bg: var(--color-accent-light);">
+        <div class="analogy-icon">🏫</div>
+        <div>
+          <div class="analogy-title">교과서 시험으로 비유!</div>
+          <p class="analogy-text">
+            학교에서 <strong>국어, 수학, 영어, 과학, 사회, 음악</strong> 시험을 따로 보듯이,
+            로봇 AI도 각각 다른 능력을 테스트하는 <strong>6가지 다른 시험장</strong>이 있어요.
+            한 과목만 잘하면 안 되고, <strong>여러 과목 모두 잘해야 진짜 실력</strong>이죠!
+          </p>
+        </div>
+      </div>
+
+      <div class="bench-grid mt-2">
+        <div class="bench-card">
+          <div class="bench-card-name">📋 LIBERO-plus</div>
+          <div class="bench-card-desc">조명, 카메라 각도, 지시문을 바꿔가며 로봇이 깨지는 지점을 찾는 스트레스 테스트</div>
+          <span class="bench-card-stat">~10,000개 변형 시나리오</span>
+        </div>
+        <div class="bench-card">
+          <div class="bench-card-name">🤲 RoboTwin 2.0</div>
+          <div class="bench-card-desc">양팔 로봇 조작 50가지 작업. 양손을 동시에 써야 하는 어려운 과제!</div>
+          <span class="bench-card-stat">10만+ 학습 궤적 제공</span>
+        </div>
+        <div class="bench-card">
+          <div class="bench-card-name">🍳 RoboCasa365</div>
+          <div class="bench-card-desc">2,500개 가상 주방에서 365가지 요리 작업. 가장 넓은 과제 범위!</div>
+          <span class="bench-card-stat">365개 주방 작업</span>
+        </div>
+        <div class="bench-card">
+          <div class="bench-card-name">🧩 RoboCerebra</div>
+          <div class="bench-card-desc">3~6단계 하위 목표를 연결하는 장기 계획 시험</div>
+          <span class="bench-card-stat">6,660 에피소드</span>
+        </div>
+        <div class="bench-card">
+          <div class="bench-card-name">🧠 RoboMME</div>
+          <div class="bench-card-desc">물체 개수 세기, 숨은 물체 추적, 시연 따라하기 — 기억력 시험!</div>
+          <span class="bench-card-stat">4개 기억 능력 세트</span>
+        </div>
+        <div class="bench-card">
+          <div class="bench-card-name">🔬 VLABench</div>
+          <div class="bench-card-desc">물리 지식, 추론, 커피 만들기 같은 복합 과제 — 지능 시험!</div>
+          <span class="bench-card-stat">지식 + 추론 능력 평가</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 5. IMPROVE — DAgger & Training ==================== -->
+  <section style="background: white;">
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-improve)">5</span> 🔄 개선하라 — DAgger 교정과 학습 인프라</h2>
+      <p class="section-desc">로봇이 실패하면 사람이 직접 교정! 교정 데이터가 바로 다음 학습에 반영됩니다</p>
+
+      <div class="analogy-box" style="--ab-color: var(--color-improve); --ab-bg: var(--color-secondary-light);">
+        <div class="analogy-icon">👨‍🏫</div>
+        <div>
+          <div class="analogy-title">개인 과외 선생님!</div>
+          <p class="analogy-text">
+            학생이 문제를 풀다가 막히면, 과외 선생님이 <strong>"여기서부터 이렇게 해봐"</strong> 하고 직접 보여주죠?
+            <strong>DAgger(대거)</strong>도 같은 원리예요! 로봇이 작업하다 실패하면, 사람이 리더 팔로 <strong>"이렇게 해야 해"</strong> 하고 직접 교정해줍니다.
+            그 교정 동작이 자동으로 저장되어 바로 다음 학습에 사용됩니다!
+          </p>
+          <p class="analogy-real">
+            💡 <strong>새 CLI:</strong> <code>lerobot-rollout --strategy.type=dagger</code> 한 줄로 이 모든 과정이 동작합니다. 배포 → 교정 수집 → 재학습의 "학습 바퀴(Flywheel)"가 CLI 플래그 하나로!
+          </p>
+        </div>
+      </div>
+
+      <!-- DAgger Flow -->
+      <div class="vflow mt-2">
+        <div class="vflow-node" style="--nc: var(--color-improve)">
+          <span class="nn">1</span> 🦾 정책 배포 — 로봇이 학습된 정책으로 작업 수행
+        </div>
+        <div class="vflow-arrow">▼</div>
+        <div class="vflow-node" style="--nc: var(--color-danger)">
+          <span class="nn">2</span> ❌ 실패 감지 — 로봇이 실수! (사람이 버튼/페달 누름)
+        </div>
+        <div class="vflow-arrow">▼</div>
+        <div class="vflow-node" style="--nc: var(--color-warning)">
+          <span class="nn">3</span> 👨‍🏫 사람 교정 — 리더 팔로 올바른 동작을 시연
+          <span class="sub">교정 프레임에 자동으로 intervention 태그 부착</span>
+        </div>
+        <div class="vflow-arrow">▼</div>
+        <div class="vflow-node" style="--nc: var(--color-accent)">
+          <span class="nn">4</span> 💾 데이터 저장 — 교정 동작이 데이터셋에 자동 저장
+        </div>
+        <div class="vflow-arrow">▼</div>
+        <div class="vflow-node" style="--nc: var(--color-improve)">
+          <span class="nn">5</span> 🔄 재학습 — 교정 데이터로 정책을 파인튜닝
+          <span class="sub">배포 → 교정 → 학습 → 배포 → … 순환 반복!</span>
+        </div>
+      </div>
+
+      <!-- Training Infra -->
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-top: 2.5rem;">☁️ 학습 인프라 — GPU가 없어도 OK!</h3>
+
+      <div class="compare-grid mt-1">
+        <div class="compare-card">
+          <div class="compare-header" style="background: var(--color-improve)">
+            <span class="compare-icon">🔀</span>
+            <h4>FSDP 분산 학습</h4>
+          </div>
+          <div class="compare-body">
+            <div class="ci"><span class="cl">무엇</span><span class="cv">모델을 여러 GPU에 분산</span></div>
+            <div class="ci"><span class="cl">비유</span><span class="cv">교과서를 친구들이 나눠 읽기</span></div>
+            <div class="ci"><span class="cl">효과</span><span class="cv">GPU 1개로 못 하는 큰 모델도 학습 가능</span></div>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-header" style="background: var(--color-ros)">
+            <span class="compare-icon">☁️</span>
+            <h4>HF Jobs 클라우드</h4>
+          </div>
+          <div class="compare-body">
+            <div class="ci"><span class="cl">무엇</span><span class="cv">클라우드에서 학습 실행</span></div>
+            <div class="ci"><span class="cl">비유</span><span class="cv">PC방에서 고사양 게임하기</span></div>
+            <div class="ci"><span class="cl">사용법</span><span class="cv"><code style="font-size:0.75rem">--job.target=a10g</code> 추가</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 6. DATASETS — Depth, Language, Speed ==================== -->
+  <section>
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-accent)">6</span> 📦 데이터셋 — 더 깊고, 더 풍부하고, 2배 빠르게!</h2>
+      <p class="section-desc">Depth 센서 지원, AI 자동 언어 주석, 2배 빠른 데이터 로딩까지</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-accent)">📐</div>
+          <div class="stat-label">Depth 지원</div>
+          <div class="stat-desc">12-bit 깊이 영상<br>End-to-End 완성</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-primary)">🏷️</div>
+          <div class="stat-label">AI 자동 주석</div>
+          <div class="stat-desc">VLM이 에피소드 보고<br>자동 언어 설명 생성</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-improve)">⚡ 2×</div>
+          <div class="stat-label">데이터 로딩</div>
+          <div class="stat-desc">병렬 디코딩<br>275초 → 0.06초</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-warning)">🎬</div>
+          <div class="stat-label">코덱 자유</div>
+          <div class="stat-desc">H264, AV1, NVENC 등<br>원하는 코덱 선택</div>
+        </div>
+      </div>
+
+      <div class="analogy-box mt-2" style="--ab-color: var(--color-accent); --ab-bg: var(--color-accent-light);">
+        <div class="analogy-icon">📐</div>
+        <div>
+          <div class="analogy-title">Depth 지원이 왜 중요할까?</div>
+          <p class="analogy-text">
+            RGB 카메라만 있으면 로봇은 <strong>"사진"</strong>만 봐요. 물체가 가까이 있는지 멀리 있는지 정확히 모릅니다.
+            Depth를 추가하면 <strong>"3D 입체 영화"</strong>처럼 거리 정보도 함께 알 수 있어요!
+            Intel RealSense 카메라를 연결하고 <code>use_depth: true</code> 한 줄이면 끝!
+          </p>
+          <p class="analogy-real">
+            💡 <strong>우리 랩과의 연결</strong> — ZETA Satellite Robotics에서 PR #3644로 기여한 깊이맵 기능이 v0.6.0에 공식 포함되었습니다!
+          </p>
+        </div>
+      </div>
+
+      <div class="accordion mt-2">
+        <input type="checkbox" id="acc-lang" class="accordion-toggle" hidden>
+        <label for="acc-lang" class="accordion-header">
+          <span>🏷️ 심화: AI 자동 언어 주석은 어떻게 동작하나요?</span>
+          <span class="accordion-chevron">▸</span>
+        </label>
+        <div class="accordion-body">
+          <p style="font-size: 0.9rem; line-height: 1.7;">
+            <code>lerobot-annotate</code> CLI를 사용하면, VLM(시각-언어 모델)이 로봇 에피소드 영상을 직접 보고
+            "지금 로봇이 빨간 큐브를 집고 있습니다"처럼 <strong>시간별 언어 설명</strong>을 자동으로 생성합니다.
+            이렇게 만들어진 풍부한 텍스트 주석은 <strong>미래의 언어 지시 기반 로봇 정책</strong> 학습에 핵심 재료가 됩니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 7. Community & Ecosystem ==================== -->
+  <section style="background: white;">
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-improve)">7</span> 🌐 커뮤니티 & 생태계</h2>
+      <p class="section-desc">브라우저 UI, VR 텔레오퍼레이션, 40% 가벼운 설치까지</p>
+
+      <div class="wm-grid">
+        <div class="wm-card" style="border-color: var(--color-improve);">
+          <div class="wm-card-emoji">🖥️</div>
+          <div class="wm-card-name" style="color: var(--color-improve);">LeLab</div>
+          <div class="wm-card-desc">
+            CLI 없이 <strong>브라우저에서</strong> 캘리브레이션 → 텔레오퍼레이션 → 녹화 → 학습 → 배포까지!
+            SO-ARM101 지원.
+          </div>
+          <span class="wm-card-tag" style="background: var(--color-secondary-light); color: var(--color-secondary);">웹 UI</span>
+        </div>
+        <div class="wm-card" style="border-color: var(--color-primary);">
+          <div class="wm-card-emoji">🥽</div>
+          <div class="wm-card-name">Isaac Teleop</div>
+          <div class="wm-card-desc">
+            VR 컨트롤러로 SO-101을 원격 조종!
+            NVIDIA Isaac Teleop 스택 + CloudXR/OpenXR 사용.
+          </div>
+          <span class="wm-card-tag">NVIDIA 협업</span>
+        </div>
+        <div class="wm-card" style="border-color: var(--color-accent);">
+          <div class="wm-card-emoji">📦</div>
+          <div class="wm-card-name" style="color: var(--color-accent);">가벼운 설치</div>
+          <div class="wm-card-desc">
+            기본 의존성 <strong>40% 감소!</strong>
+            <code>pip install lerobot</code>으로 최소 설치.
+            필요한 것만 <code>[training]</code>, <code>[evaluation]</code> 등으로 추가.
+          </div>
+          <span class="wm-card-tag" style="background: var(--color-accent-light); color: var(--color-accent);">-40% 의존성</span>
+        </div>
+      </div>
+
+      <div class="callout callout-tip mt-2">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong>하드웨어 가이드:</strong> "어떤 GPU가 필요하고, 학습에 얼마나 걸리나요?"라는 질문에 답하는 <strong>컴퓨트 하드웨어 가이드</strong>가 새로 추가되었습니다. RTX 4090부터 4×H100까지 정책별 VRAM 사용량과 학습 시간이 정리되어 있어요.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 8. Version History ==================== -->
+  <section>
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-primary)">8</span> 📈 LeRobot 진화 과정</h2>
+      <p class="section-desc">v0.4 → v0.5 → v0.6 — 어떻게 성장해왔는지 한 눈에!</p>
+
+      <div class="timeline">
+        <div class="tl-item" data-ver="0.4" style="--tc: #94A3B8;">
+          <div class="tl-title">v0.4 — 기초 다지기</div>
+          <div class="tl-desc">ACT, Diffusion Policy 등 기본 정책 지원. 데이터셋 v2.0. SO-100/101 로봇 지원 시작.</div>
+        </div>
+        <div class="tl-item" data-ver="0.5" style="--tc: var(--color-secondary);">
+          <div class="tl-title">v0.5 — VLA 확장기</div>
+          <div class="tl-desc">SmolVLA, Pi0 등 VLA 모델 대거 추가. LeRobotDataset v3.0. 평가 허브 기반 마련.</div>
+        </div>
+        <div class="tl-item" data-ver="0.6" style="--tc: var(--color-primary);">
+          <div class="tl-title">v0.6 — 학습 루프 완성! ← 현재</div>
+          <div class="tl-desc">
+            World Model 3종 · VLA 5종 추가 · Reward Model API · 벤치마크 6종 ·
+            DAgger 교정 · FSDP · HF Jobs 클라우드 · Depth End-to-End · AI 언어 주석 ·
+            LeLab 브라우저 UI · 40% 가벼운 설치
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 9. Summary ==================== -->
+  <section style="background: white;">
+    <div class="container">
+      <h2 class="section-title"><span class="num" style="background:var(--color-primary)">9</span> 📋 한 장 요약</h2>
+      <p class="section-desc">v0.6.0의 모든 것을 카테고리별로 정리!</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-imagine); font-size: 1.5rem;">3종</div>
+          <div class="stat-label">🌍 월드 모델</div>
+          <div class="stat-desc">VLA-JEPA · LingBot-VA · FastWAM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-secondary); font-size: 1.5rem;">5종</div>
+          <div class="stat-label">🤖 새 VLA</div>
+          <div class="stat-desc">GR00T N1.7 · MolmoAct2 · EO-1 · MTDiT · EVO1</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-evaluate); font-size: 1.5rem;">2종</div>
+          <div class="stat-label">🏅 보상 모델</div>
+          <div class="stat-desc">Robometer · TOPReward</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-evaluate); font-size: 1.5rem;">6종</div>
+          <div class="stat-label">🎯 벤치마크</div>
+          <div class="stat-desc">LIBERO+ · RoboTwin2 · RoboCasa365 등</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-improve); font-size: 1.5rem;">3종</div>
+          <div class="stat-label">⚡ 새 CLI</div>
+          <div class="stat-desc">lerobot-eval · lerobot-rollout · lerobot-annotate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--color-accent); font-size: 1.5rem;">40%↓</div>
+          <div class="stat-label">📦 설치 크기</div>
+          <div class="stat-desc">의존성 대폭 감소 · 모듈식 설치</div>
+        </div>
+      </div>
+
+      <!-- Final Architecture -->
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 2.5rem;">🏗️ v0.6.0이 만든 완전한 로봇 학습 스택</h3>
+
+      <div class="arch-diagram mt-1">
+        <div class="arch-layer" style="--lc: var(--color-imagine)">
+          <div class="arch-layer-label">🌍 Imagine — 상상</div>
+          <div class="arch-boxes">
+            <div class="arch-box">VLA-JEPA</div>
+            <div class="arch-box">LingBot-VA</div>
+            <div class="arch-box">FastWAM</div>
+          </div>
+        </div>
+        <div class="arch-connector">▼</div>
+        <div class="arch-layer" style="--lc: var(--color-secondary)">
+          <div class="arch-layer-label">🤖 Act — 행동 (정책)</div>
+          <div class="arch-boxes">
+            <div class="arch-box">ACT</div>
+            <div class="arch-box">SmolVLA</div>
+            <div class="arch-box">GR00T N1.7</div>
+            <div class="arch-box">MolmoAct2</div>
+            <div class="arch-box">EO-1</div>
+            <div class="arch-box">MTDiT</div>
+            <div class="arch-box">EVO1</div>
+          </div>
+        </div>
+        <div class="arch-connector">▼</div>
+        <div class="arch-layer" style="--lc: var(--color-evaluate)">
+          <div class="arch-layer-label">🏅 Evaluate — 평가</div>
+          <div class="arch-boxes">
+            <div class="arch-box">Robometer</div>
+            <div class="arch-box">TOPReward</div>
+            <div class="arch-box">lerobot-eval (9종 벤치마크)</div>
+          </div>
+        </div>
+        <div class="arch-connector">▼</div>
+        <div class="arch-layer" style="--lc: var(--color-improve)">
+          <div class="arch-layer-label">🔄 Improve — 개선</div>
+          <div class="arch-boxes">
+            <div class="arch-box">DAgger 교정</div>
+            <div class="arch-box">FSDP 분산</div>
+            <div class="arch-box">HF Jobs 클라우드</div>
+            <div class="arch-box">lerobot-rollout</div>
+          </div>
+        </div>
+        <div class="arch-connector">▼</div>
+        <div class="arch-layer" style="--lc: var(--color-accent)">
+          <div class="arch-layer-label">📦 Data — 데이터 인프라</div>
+          <div class="arch-boxes">
+            <div class="arch-box">Depth E2E</div>
+            <div class="arch-box">AI 언어 주석</div>
+            <div class="arch-box">2× 빠른 로딩</div>
+            <div class="arch-box">코덱 자유 선택</div>
+            <div class="arch-box">LeLab 웹 UI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <p><strong>ZETA Satellite Robotics</strong> · Physical AI Education Program</p>
+      <p style="margin-top: 0.5rem;">LeRobot v0.6.0 교육자료 · 2026년 7월 · 출처: Hugging Face 공식 릴리즈 블로그</p>
+    </div>
+  </footer>
+
+</body>
+</html>

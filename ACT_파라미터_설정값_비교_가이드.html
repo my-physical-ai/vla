@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACT 파라미터 완전 가이드 — 설정값 비교표 - Physical AI Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-primary: #7C3AED;
+      --color-primary-light: #EDE9FE;
+      --color-secondary: #2563EB;
+      --color-secondary-light: #DBEAFE;
+      --color-success: #059669;
+      --color-success-light: #D1FAE5;
+      --color-warning: #D97706;
+      --color-warning-light: #FEF3C7;
+      --color-danger: #DC2626;
+      --color-danger-light: #FEE2E2;
+      --color-surface: #F8FAFC;
+      --color-card: #FFFFFF;
+      --color-text: #1E293B;
+      --color-muted: #64748B;
+      --color-border: #E2E8F0;
+      --color-brain: #7C3AED;
+      --color-action: #EA580C;
+      --color-vision: #0891B2;
+      --color-optim: #059669;
+      --color-sched: #D97706;
+    }
+    body { font-family: 'Noto Sans KR', sans-serif; color: var(--color-text); background: var(--color-surface); line-height: 1.75; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .container { max-width: 920px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 3rem 0; }
+
+    /* 히어로 */
+    .hero { background: linear-gradient(135deg, #1E1B4B, #4C1D95, #7C3AED); color: white; padding: 4rem 0 3.5rem; position: relative; overflow: hidden; }
+    .hero::before { content:''; position:absolute; top:-40%; right:-15%; width:500px; height:500px; background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%); border-radius:50%; }
+    .hero .container { position: relative; z-index: 1; }
+    .hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .hero-tag { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); padding: 0.3rem 0.85rem; border-radius: 50px; font-size: 0.78rem; font-weight: 500; }
+    .hero h1 { font-size: 2.4rem; font-weight: 900; line-height: 1.2; margin-bottom: 1rem; }
+    .hero-subtitle { font-size: 1.1rem; opacity: 0.9; line-height: 1.6; max-width: 700px; }
+    .hero-brand { margin-top: 1.5rem; font-size: 0.78rem; opacity: 0.5; font-weight: 500; }
+
+    /* 섹션 타이틀 */
+    .section-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-desc { color: var(--color-muted); font-size: 0.95rem; margin-bottom: 1.75rem; line-height: 1.6; }
+    .section-num { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; color: white; font-size: 0.82rem; font-weight: 700; flex-shrink: 0; }
+
+    /* 비유 박스 */
+    .analogy-box { display: flex; gap: 1.2rem; padding: 1.4rem; border-radius: 12px; border-left: 4px solid; margin-bottom: 1.5rem; }
+    .analogy-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .analogy-title { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+    .analogy-text { line-height: 1.7; font-size: 0.93rem; }
+    .analogy-real { margin-top: 0.7rem; padding-top: 0.7rem; font-size: 0.87rem; color: var(--color-muted); border-top: 1px dashed; }
+    .ab-brain { background: #F5F3FF; border-color: var(--color-brain); }
+    .ab-brain .analogy-title { color: var(--color-brain); }
+    .ab-brain .analogy-real { border-color: #C4B5FD; }
+    .ab-action { background: #FFF7ED; border-color: var(--color-action); }
+    .ab-action .analogy-title { color: var(--color-action); }
+    .ab-action .analogy-real { border-color: #FDBA74; }
+    .ab-vision { background: #ECFEFF; border-color: var(--color-vision); }
+    .ab-vision .analogy-title { color: var(--color-vision); }
+    .ab-vision .analogy-real { border-color: #67E8F9; }
+    .ab-optim { background: #ECFDF5; border-color: var(--color-optim); }
+    .ab-optim .analogy-title { color: var(--color-optim); }
+    .ab-optim .analogy-real { border-color: #6EE7B7; }
+    .ab-sched { background: #FFFBEB; border-color: var(--color-sched); }
+    .ab-sched .analogy-title { color: var(--color-sched); }
+    .ab-sched .analogy-real { border-color: #FCD34D; }
+
+    /* 비교 테이블 */
+    .cmp-table-wrap { overflow-x: auto; margin: 1.25rem 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
+    .cmp-table thead th { padding: 0.85rem 0.75rem; font-weight: 700; text-align: center; color: white; position: sticky; top: 0; }
+    .cmp-table tbody td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--color-border); text-align: center; background: var(--color-card); }
+    .cmp-table tbody tr:last-child td { border-bottom: none; }
+    .cmp-table tbody tr:hover td { background: var(--color-surface); }
+    .cmp-table .param-name { text-align: left; font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+    .cmp-table .rec { background: #F0FDF4 !important; position: relative; }
+    .cmp-table .rec::after { content: '⭐'; position: absolute; top: 2px; right: 4px; font-size: 0.6rem; }
+    .th-brain { background: linear-gradient(135deg, #5B21B6, #7C3AED); }
+    .th-action { background: linear-gradient(135deg, #C2410C, #EA580C); }
+    .th-vision { background: linear-gradient(135deg, #0E7490, #0891B2); }
+    .th-optim { background: linear-gradient(135deg, #047857, #059669); }
+    .th-sched { background: linear-gradient(135deg, #B45309, #D97706); }
+
+    /* 설정 프리셋 카드 */
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .preset-card { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); background: var(--color-card); border: 1px solid var(--color-border); }
+    .preset-header { padding: 1rem 1.25rem; color: white; }
+    .preset-header h4 { font-size: 1rem; margin: 0.3rem 0 0; }
+    .preset-header .preset-emoji { font-size: 1.6rem; }
+    .preset-body { padding: 1rem 1.25rem; font-size: 0.85rem; }
+    .preset-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid var(--color-border); }
+    .preset-row:last-child { border-bottom: none; }
+    .preset-key { color: var(--color-muted); }
+    .preset-val { font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+    .preset-note { margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--color-border); font-size: 0.8rem; color: var(--color-muted); line-height: 1.5; }
+
+    /* 흐름도 */
+    .flow-diagram { display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 1.75rem 1rem; background: var(--color-surface); border-radius: 16px; overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--color-border); }
+    .flow-node { background: var(--color-card); border: 2px solid var(--node-color, var(--color-primary)); border-radius: 12px; padding: 1.1rem; text-align: center; min-width: 115px; transition: transform 0.2s, box-shadow 0.2s; }
+    .flow-node:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+    .flow-node-icon { font-size: 1.8rem; margin-bottom: 0.35rem; }
+    .flow-node-title { font-weight: 700; font-size: 0.82rem; }
+    .flow-node-desc { font-size: 0.72rem; color: var(--color-muted); margin-top: 0.2rem; }
+    .flow-arrow { flex-shrink: 0; }
+
+    /* 스케줄러 시각화 */
+    .sched-visual { background: var(--color-card); border-radius: 16px; padding: 1.75rem; margin: 1.5rem 0; border: 1px solid var(--color-border); }
+    .sched-svg { width: 100%; height: auto; }
+
+    /* 콜아웃 */
+    .callout { display: flex; gap: 0.7rem; padding: 1rem 1.2rem; border-radius: 10px; align-items: flex-start; margin: 1rem 0; }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .callout-content { font-size: 0.9rem; line-height: 1.6; }
+    .callout-tip { background: var(--color-success-light); border-left: 3px solid var(--color-success); }
+    .callout-warning { background: var(--color-warning-light); border-left: 3px solid var(--color-warning); }
+    .callout-danger { background: var(--color-danger-light); border-left: 3px solid var(--color-danger); }
+    .callout-info { background: var(--color-secondary-light); border-left: 3px solid var(--color-secondary); }
+
+    /* 핵심 정리 */
+    .key-points { background: linear-gradient(135deg, #1E1B4B, #4C1D95); border-radius: 16px; padding: 2rem; margin: 2rem 0; color: white; }
+    .key-points h3 { font-size: 1.25rem; font-weight: 900; margin-bottom: 1.2rem; }
+    .kp-item { display: flex; gap: 0.7rem; margin-bottom: 0.85rem; align-items: flex-start; }
+    .kp-item:last-child { margin-bottom: 0; }
+    .kp-num { width: 1.7rem; height: 1.7rem; border-radius: 50%; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+    .kp-text { font-size: 0.9rem; line-height: 1.6; opacity: 0.95; }
+
+    /* chunk/action 시각화 */
+    .chunk-visual { background: var(--color-card); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--color-border); margin: 1.25rem 0; }
+    .chunk-bar { display: flex; border-radius: 8px; overflow: hidden; height: 2.5rem; margin: 0.75rem 0; font-size: 0.72rem; font-weight: 700; }
+    .chunk-exec { display: flex; align-items: center; justify-content: center; color: white; }
+    .chunk-discard { display: flex; align-items: center; justify-content: center; color: white; opacity: 0.7; }
+    .chunk-legend { display: flex; gap: 1.5rem; font-size: 0.8rem; color: var(--color-muted); margin-top: 0.5rem; }
+    .chunk-legend span::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 0.3rem; vertical-align: middle; }
+
+    /* 구분선 */
+    .divider { border: none; border-top: 2px dashed var(--color-border); margin: 3rem 0; }
+
+    /* Accordion */
+    .accordion { border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; margin: 1rem 0; }
+    .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.2rem; cursor: pointer; font-weight: 600; background: var(--color-surface); user-select: none; font-size: 0.92rem; }
+    .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0 1.2rem; }
+    .accordion-toggle:checked ~ .accordion-body { max-height: 3000px; padding: 1rem 1.2rem; }
+    .accordion-toggle:checked ~ .accordion-header .accordion-chevron { transform: rotate(90deg); }
+    .accordion-chevron { transition: transform 0.2s; }
+
+    .footer { text-align: center; padding: 2rem 0 3rem; color: var(--color-muted); font-size: 0.78rem; }
+    .footer-brand { font-weight: 700; color: var(--color-primary); }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.7rem; }
+      .section-title { font-size: 1.3rem; }
+      .flow-diagram { flex-direction: column; }
+      .flow-arrow svg { transform: rotate(90deg); }
+      .preset-grid { grid-template-columns: 1fr; }
+      .analogy-box { flex-direction: column; gap: 0.6rem; }
+    }
+    @media print {
+      .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .flow-node:hover { transform: none; }
+      .accordion-body { max-height: none !important; padding: 1rem 1.2rem !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== 히어로 ===== -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-tags">
+      <span class="hero-tag">🧠 ACT Policy</span>
+      <span class="hero-tag">📊 설정값 비교표</span>
+      <span class="hero-tag">⚙️ 파라미터 튜닝</span>
+      <span class="hero-tag">🤖 SO-101</span>
+    </div>
+    <h1>ACT 파라미터 완전 가이드<br>— 설정값 비교표</h1>
+    <p class="hero-subtitle">
+      ACT 모델의 모든 파라미터를 <strong>설정값별 비교표</strong>로 정리했습니다.
+      각 값이 로봇 동작에 어떤 영향을 미치는지, 어떤 상황에서 어떤 값을 선택해야 하는지
+      한눈에 비교할 수 있습니다.
+    </p>
+    <div class="hero-brand">ZETA Satellite Robotics · Physical AI Education</div>
+  </div>
+</header>
+
+<!-- ===== 개요 플로우 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title">ACT 파라미터 5대 영역</h2>
+    <p class="section-desc">ACT의 파라미터는 5개 영역으로 나뉘며, 각 영역이 학습의 서로 다른 측면을 담당합니다.</p>
+    <div class="flow-diagram">
+      <div class="flow-node" style="--node-color: var(--color-brain)">
+        <div class="flow-node-icon">🧠</div>
+        <div class="flow-node-title">뇌 설계</div>
+        <div class="flow-node-desc">모델 구조</div>
+      </div>
+      <div class="flow-arrow"><svg width="36" height="24" viewBox="0 0 40 24"><path d="M0 12h30M24 4l8 8-8 8" stroke="var(--color-action)" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="flow-node" style="--node-color: var(--color-action)">
+        <div class="flow-node-icon">✋</div>
+        <div class="flow-node-title">동작 계획</div>
+        <div class="flow-node-desc">Chunk & Action</div>
+      </div>
+      <div class="flow-arrow"><svg width="36" height="24" viewBox="0 0 40 24"><path d="M0 12h30M24 4l8 8-8 8" stroke="var(--color-vision)" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="flow-node" style="--node-color: var(--color-vision)">
+        <div class="flow-node-icon">👓</div>
+        <div class="flow-node-title">눈 설정</div>
+        <div class="flow-node-desc">비전 백본</div>
+      </div>
+      <div class="flow-arrow"><svg width="36" height="24" viewBox="0 0 40 24"><path d="M0 12h30M24 4l8 8-8 8" stroke="var(--color-optim)" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="flow-node" style="--node-color: var(--color-optim)">
+        <div class="flow-node-icon">📝</div>
+        <div class="flow-node-title">공부 방법</div>
+        <div class="flow-node-desc">옵티마이저</div>
+      </div>
+      <div class="flow-arrow"><svg width="36" height="24" viewBox="0 0 40 24"><path d="M0 12h30M24 4l8 8-8 8" stroke="var(--color-sched)" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="flow-node" style="--node-color: var(--color-sched)">
+        <div class="flow-node-icon">📅</div>
+        <div class="flow-node-title">공부 계획</div>
+        <div class="flow-node-desc">스케줄러</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 1. 뇌 설계 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-brain)">1</span> 모델 구조 — "AI의 뇌 크기 설계"</h2>
+    <p class="section-desc">뇌가 클수록 복잡한 동작을 배울 수 있지만, GPU 메모리와 학습 시간이 더 필요합니다.</p>
+
+    <div class="analogy-box ab-brain">
+      <div class="analogy-icon">🧠</div>
+      <div>
+        <div class="analogy-title">비유: 학생의 뇌 크기</div>
+        <p class="analogy-text">
+          <strong>dim_model</strong>은 뇌의 크기, <strong>dim_feedforward</strong>는 뇌 안의 고속도로 폭,
+          <strong>encoder/decoder 층수</strong>는 생각의 깊이, <strong>dropout</strong>은 일부러 눈을 가리고 공부하기(과적합 방지)예요.
+        </p>
+      </div>
+    </div>
+
+    <!-- dim_model 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🧠 dim_model — Transformer 내부 차원</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-brain">설정값</th>
+          <th class="th-brain">뇌 크기</th>
+          <th class="th-brain">표현력</th>
+          <th class="th-brain">GPU 메모리</th>
+          <th class="th-brain">학습 속도</th>
+          <th class="th-brain">적합한 상황</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="param-name">64</td>
+            <td>🧠 아주 작음</td>
+            <td>⭐</td>
+            <td>~1GB</td>
+            <td>🚀 매우 빠름</td>
+            <td>디버깅/테스트용</td>
+          </tr>
+          <tr>
+            <td class="param-name">128</td>
+            <td>🧠 작음</td>
+            <td>⭐⭐</td>
+            <td>~2GB</td>
+            <td>🚀 빠름</td>
+            <td>단순 태스크 (1가지 동작)</td>
+          </tr>
+          <tr>
+            <td class="param-name">256</td>
+            <td>🧠🧠 보통</td>
+            <td>⭐⭐⭐</td>
+            <td>~3GB</td>
+            <td>⚡ 보통</td>
+            <td>일반적인 pick & place</td>
+          </tr>
+          <tr class="rec">
+            <td class="param-name">384</td>
+            <td>🧠🧠🧠 큼</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>~5GB</td>
+            <td>🐢 느림</td>
+            <td>복잡한 동작 (추천)</td>
+          </tr>
+          <tr>
+            <td class="param-name">512</td>
+            <td>🧠🧠🧠🧠 매우 큼</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>~8GB</td>
+            <td>🐢 매우 느림</td>
+            <td>대규모 데이터 + 고성능 GPU</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- dim_feedforward 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🛣️ dim_feedforward — FFN 차원 (뇌 안의 고속도로 폭)</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-brain">설정값</th>
+          <th class="th-brain">dim_model 대비</th>
+          <th class="th-brain">처리 능력</th>
+          <th class="th-brain">적합한 상황</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">256</td><td>×1 (동일)</td><td>⭐⭐</td><td>아주 가벼운 모델</td></tr>
+          <tr><td class="param-name">512</td><td>×2</td><td>⭐⭐⭐</td><td>경량 모델</td></tr>
+          <tr class="rec"><td class="param-name">1024</td><td>×2.7 (dim=384)</td><td>⭐⭐⭐⭐</td><td>균형 잡힌 선택 (추천)</td></tr>
+          <tr><td class="param-name">1536</td><td>×4</td><td>⭐⭐⭐⭐⭐</td><td>충분한 GPU 여유 시</td></tr>
+          <tr><td class="param-name">2048</td><td>×4 (dim=512)</td><td>⭐⭐⭐⭐⭐</td><td>대형 모델용</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content"><strong>공식:</strong> dim_feedforward = dim_model × <strong>2~4배</strong>가 일반적. 384 × 2.7 ≈ 1024가 우리 설정이에요.</div>
+    </div>
+
+    <!-- encoder/decoder 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🏗️ 인코더/디코더 층수 — 생각의 깊이</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-brain">파라미터</th>
+          <th class="th-brain">1층</th>
+          <th class="th-brain">3층</th>
+          <th class="th-brain">5층</th>
+          <th class="th-brain">8층</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="param-name">n_encoder_layers<br><span style="font-family:'Noto Sans KR';font-size:0.72rem;color:var(--color-muted);">"이해" 깊이</span></td>
+            <td>피상적 이해</td>
+            <td class="rec">충분한 이해 (추천)</td>
+            <td>깊은 이해</td>
+            <td>과도 (과적합 위험)</td>
+          </tr>
+          <tr>
+            <td class="param-name">n_decoder_layers<br><span style="font-family:'Noto Sans KR';font-size:0.72rem;color:var(--color-muted);">"동작 생성" 깊이</span></td>
+            <td class="rec">충분 (추천)</td>
+            <td>복잡한 동작용</td>
+            <td>과도</td>
+            <td>불필요</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="analogy-box ab-brain" style="padding:1rem 1.3rem;">
+      <div class="analogy-icon">💡</div>
+      <div>
+        <div class="analogy-title">왜 인코더 > 디코더?</div>
+        <p class="analogy-text">수학 문제를 <strong>"이해하는 것"(인코더)</strong>이 어렵지, 이해하고 나면 <strong>"답 쓰는 것"(디코더)</strong>은 쉬워요! 그래서 인코더=3, 디코더=1이 효율적이에요.</p>
+      </div>
+    </div>
+
+    <!-- dropout 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🙈 dropout — 과적합 방지율</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-brain">설정값</th>
+          <th class="th-brain">뇌 사용률</th>
+          <th class="th-brain">효과</th>
+          <th class="th-brain">데이터 적을 때</th>
+          <th class="th-brain">데이터 많을 때</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">0.0</td><td>100%</td><td>과적합 방지 없음</td><td>❌ 외움</td><td>✅ OK</td></tr>
+          <tr><td class="param-name">0.05</td><td>95%</td><td>약한 방지</td><td>⚠️ 부족</td><td>✅ 좋음</td></tr>
+          <tr class="rec"><td class="param-name">0.1</td><td>90%</td><td>균형 (추천)</td><td>✅ 적당</td><td>✅ 좋음</td></tr>
+          <tr><td class="param-name">0.2</td><td>80%</td><td>강한 방지</td><td>✅ 좋음</td><td>⚠️ 과도</td></tr>
+          <tr><td class="param-name">0.3</td><td>70%</td><td>매우 강함</td><td>✅ 데이터<10개</td><td>❌ 성능 저하</td></tr>
+          <tr><td class="param-name">0.5</td><td>50%</td><td>극단적</td><td>⚠️ 너무 느림</td><td>❌ 성능 저하</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 2. 동작 계획 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-action)">2</span> 동작 생성 — "한 번에 얼마나 계획할까?"</h2>
+    <p class="section-desc">ACT의 핵심! chunk_size로 멀리 계획하고, n_action_steps로 가까이만 실행합니다.</p>
+
+    <div class="analogy-box ab-action">
+      <div class="analogy-icon">🗺️</div>
+      <div>
+        <div class="analogy-title">비유: 내비게이션 운전</div>
+        <p class="analogy-text">
+          <strong>chunk_size</strong> = 내비가 보여주는 전체 경로 (멀리까지 계획)<br>
+          <strong>n_action_steps</strong> = 실제로 핸들을 조작하는 구간 (가까이만 실행)<br>
+          멀리 보면서 가까이 조절하면 <strong>부드러우면서도 정확한 운전</strong>이 돼요!
+        </p>
+      </div>
+    </div>
+
+    <!-- chunk_size 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1rem 0 0.5rem;">📋 chunk_size — 한 번에 계획하는 미래 스텝 수</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-action">설정값</th>
+          <th class="th-action">시간 환산<br>(30fps)</th>
+          <th class="th-action">동작 부드러움</th>
+          <th class="th-action">반응 속도</th>
+          <th class="th-action">적합한 태스크</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">10</td><td>0.3초</td><td>⭐⭐ 끊김</td><td>🚀 즉각 반응</td><td>빠른 반사 동작</td></tr>
+          <tr><td class="param-name">20</td><td>0.7초</td><td>⭐⭐⭐</td><td>⚡ 빠름</td><td>단순 pick & place</td></tr>
+          <tr class="rec"><td class="param-name">50</td><td>1.7초</td><td>⭐⭐⭐⭐ 부드러움</td><td>🐢 보통</td><td>복잡한 조작 (추천)</td></tr>
+          <tr><td class="param-name">100</td><td>3.3초</td><td>⭐⭐⭐⭐⭐ 매우 부드러움</td><td>🐢 느림</td><td>긴 연속 동작</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- n_action_steps 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🏃 n_action_steps — 실제 실행하는 스텝 수</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-action">설정값</th>
+          <th class="th-action">chunk 대비<br>(chunk=50)</th>
+          <th class="th-action">재계획 빈도</th>
+          <th class="th-action">정확도</th>
+          <th class="th-action">계산 부담</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">5</td><td>10%만 실행</td><td>🔄 매우 자주</td><td>🎯 매우 높음</td><td>💻 높음 (추론 많음)</td></tr>
+          <tr><td class="param-name">10</td><td>20%</td><td>🔄 자주</td><td>🎯 높음</td><td>💻 보통</td></tr>
+          <tr class="rec"><td class="param-name">20</td><td>40%</td><td>🔄 적당</td><td>🎯 적당 (추천)</td><td>💻 낮음</td></tr>
+          <tr><td class="param-name">50</td><td>100% 전부 실행</td><td>❌ 재계획 없음</td><td>⚠️ 낮음</td><td>💻 최저</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- chunk vs action 시각화 -->
+    <div class="chunk-visual">
+      <div style="font-weight:700; font-size:0.92rem; margin-bottom:0.5rem;">chunk_size=50, n_action_steps=20 시각화</div>
+      <div style="font-size:0.8rem; color:var(--color-muted); margin-bottom:0.75rem;">50개를 계획하되 → 앞 20개만 실행 → 다시 새로 계획 (반복)</div>
+      <div style="margin-bottom:0.3rem; font-size:0.75rem; color:var(--color-muted);">1차 계획:</div>
+      <div class="chunk-bar">
+        <div class="chunk-exec" style="width:40%; background:linear-gradient(90deg, #EA580C, #F97316);">실행 (20개)</div>
+        <div class="chunk-discard" style="width:60%; background:#94A3B8;">버림 (30개)</div>
+      </div>
+      <div style="margin-bottom:0.3rem; font-size:0.75rem; color:var(--color-muted);">2차 계획 (새 위치에서):</div>
+      <div class="chunk-bar">
+        <div class="chunk-exec" style="width:40%; background:linear-gradient(90deg, #EA580C, #F97316);">실행 (20개)</div>
+        <div class="chunk-discard" style="width:60%; background:#94A3B8;">버림 (30개)</div>
+      </div>
+      <div style="margin-bottom:0.3rem; font-size:0.75rem; color:var(--color-muted);">3차 계획 (새 위치에서):</div>
+      <div class="chunk-bar">
+        <div class="chunk-exec" style="width:40%; background:linear-gradient(90deg, #EA580C, #F97316);">실행 (20개)</div>
+        <div class="chunk-discard" style="width:60%; background:#94A3B8;">버림 (30개)</div>
+      </div>
+      <div style="text-align:center; margin-top:0.75rem; font-size:0.82rem; color:var(--color-action); font-weight:600;">→ 이것이 ACT가 부드러운 동작을 만드는 비결!</div>
+    </div>
+
+    <!-- kl_weight 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🎛️ kl_weight — 다양성 vs 일관성 조절</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-action">설정값</th>
+          <th class="th-action">성격</th>
+          <th class="th-action">동작 결과</th>
+          <th class="th-action">비유</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">0.01</td><td>매우 자유롭게</td><td>매번 다른 경로 → 불안정할 수 있음</td><td>아무데나 글씨 쓰기</td></tr>
+          <tr><td class="param-name">0.05</td><td>자유롭게</td><td>다양한 접근 경로 허용</td><td>줄 근처에 자유롭게</td></tr>
+          <tr class="rec"><td class="param-name">0.1</td><td>균형 (추천)</td><td>적당한 다양성 + 안정성</td><td>줄에 맞추되 유연하게</td></tr>
+          <tr><td class="param-name">0.5</td><td>일관되게</td><td>거의 같은 경로 반복</td><td>줄에 딱 맞춰 쓰기</td></tr>
+          <tr><td class="param-name">1.0</td><td>매우 일관</td><td>항상 동일한 동작 → 유연성 부족</td><td>인쇄처럼 정확하게</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 3. 비전 백본 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-vision)">3</span> 비전 백본 — "AI의 눈 설정"</h2>
+    <p class="section-desc">카메라 이미지를 이해하는 신경망. 어떤 안경(백본)을 쓰고, 동결할지 말지가 핵심입니다.</p>
+
+    <div class="analogy-box ab-vision">
+      <div class="analogy-icon">👓</div>
+      <div>
+        <div class="analogy-title">비유: 전학생의 안경</div>
+        <p class="analogy-text">
+          ImageNet에서 전학 온 학생이 <strong>기존 안경(사전학습)</strong>을 쓰고 있어요.
+          <strong>동결</strong> = 안경 그대로 유지, <strong>미세조정</strong> = 새 환경에 맞게 안경 도수 조절!
+        </p>
+      </div>
+    </div>
+
+    <!-- vision_backbone 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1rem 0 0.5rem;">🔬 vision_backbone — 이미지 인식 네트워크</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-vision">백본</th>
+          <th class="th-vision">파라미터 수</th>
+          <th class="th-vision">인식 성능</th>
+          <th class="th-vision">속도</th>
+          <th class="th-vision">GPU 메모리</th>
+          <th class="th-vision">적합한 상황</th>
+        </tr></thead>
+        <tbody>
+          <tr class="rec">
+            <td class="param-name">resnet18</td>
+            <td>11M</td>
+            <td>⭐⭐⭐</td>
+            <td>🚀 빠름</td>
+            <td>~2GB</td>
+            <td>교육/실험 (추천)</td>
+          </tr>
+          <tr>
+            <td class="param-name">resnet34</td>
+            <td>21M</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>⚡ 보통</td>
+            <td>~3GB</td>
+            <td>중간 복잡도</td>
+          </tr>
+          <tr>
+            <td class="param-name">resnet50</td>
+            <td>25M</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>🐢 느림</td>
+            <td>~5GB</td>
+            <td>세밀한 인식 필요 시</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- backbone_lr 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🔒 optimizer_lr_backbone — 눈 동결 여부</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-vision">설정값</th>
+          <th class="th-vision">상태</th>
+          <th class="th-vision">눈(백본) 변화</th>
+          <th class="th-vision">색상 구분</th>
+          <th class="th-vision">적합한 상황</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="param-name">0.0</td>
+            <td>🔒 완전 동결</td>
+            <td>전혀 안 바뀜</td>
+            <td>❌ 못 배움</td>
+            <td>형태 구분만 필요할 때</td>
+          </tr>
+          <tr>
+            <td class="param-name">1e-6</td>
+            <td>🔓 극미세 조정</td>
+            <td>아주 살짝</td>
+            <td>⚠️ 약간</td>
+            <td>안전한 미세 조정</td>
+          </tr>
+          <tr class="rec">
+            <td class="param-name">1e-5</td>
+            <td>🔓 미세 조정 (추천)</td>
+            <td>적절히 적응</td>
+            <td>✅ 가능</td>
+            <td>색상 구분 태스크</td>
+          </tr>
+          <tr>
+            <td class="param-name">1e-4</td>
+            <td>🔓 본격 학습</td>
+            <td>크게 변화</td>
+            <td>✅ 강함</td>
+            <td>데이터 많을 때만</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-danger">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-content">
+        <strong>주의!</strong> "분홍색 블록을 노란 상자에" 같은 <strong>색상 구분 태스크</strong>에서
+        backbone_lr=0.0(동결)이면 색상 차이를 학습하지 못합니다.
+        이 경우 반드시 <strong>freeze_vision_encoder=false</strong> 또는 backbone_lr=1e-5 이상으로 설정하세요!
+        (관련: GitHub Issue #1774)
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 4. 옵티마이저 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-optim)">4</span> 옵티마이저 — "공부 방법 설정"</h2>
+    <p class="section-desc">학습률, 가중치 감쇠, 그래디언트 클리핑 — AI가 어떤 보폭으로, 얼마나 안정적으로 배울지 결정합니다.</p>
+
+    <div class="analogy-box ab-optim">
+      <div class="analogy-icon">👣</div>
+      <div>
+        <div class="analogy-title">비유: 산에서 가장 낮은 곳 찾기</div>
+        <p class="analogy-text">
+          AI 학습은 <strong>안개 낀 산에서 가장 낮은 골짜기(최적값)</strong>를 찾는 것과 같아요.
+          <strong>lr</strong>(학습률) = 한 걸음의 보폭, <strong>weight_decay</strong> = 무거운 짐 내려놓기,
+          <strong>grad_clip</strong> = 절벽에서 뛰어내리기 방지!
+        </p>
+      </div>
+    </div>
+
+    <!-- lr 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1rem 0 0.5rem;">👣 optimizer.lr — 학습률 (보폭 크기)</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-optim">설정값</th>
+          <th class="th-optim">보폭</th>
+          <th class="th-optim">학습 속도</th>
+          <th class="th-optim">안정성</th>
+          <th class="th-optim">용도</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">1e-2</td><td>🏃 매우 큰 보폭</td><td>🚀 매우 빠름</td><td>❌ 불안정 (발산 위험)</td><td>거의 사용 안 함</td></tr>
+          <tr><td class="param-name">1e-3</td><td>🚶 큰 보폭</td><td>⚡ 빠름</td><td>⚠️ 보통</td><td>처음부터 학습 시</td></tr>
+          <tr class="rec"><td class="param-name">1e-4</td><td>🐢 작은 보폭</td><td>🐢 보통</td><td>✅ 안정적 (추천)</td><td>사전학습 모델 활용 시</td></tr>
+          <tr><td class="param-name">1e-5</td><td>🐌 아주 작은 보폭</td><td>🐌 느림</td><td>✅ 매우 안정</td><td>미세 조정 (Fine-tuning)</td></tr>
+          <tr><td class="param-name">1e-6</td><td>🔬 극소 보폭</td><td>🔬 매우 느림</td><td>✅ 최고 안정</td><td>최종 마무리 단계</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- weight_decay 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🧹 weight_decay — 가중치 감쇠 (불필요한 암기 지우기)</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-optim">설정값</th>
+          <th class="th-optim">정리 강도</th>
+          <th class="th-optim">과적합 방지</th>
+          <th class="th-optim">성능 영향</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">0</td><td>지우개 없음</td><td>❌ 방지 안 됨</td><td>과적합 시 성능 저하</td></tr>
+          <tr class="rec"><td class="param-name">1e-4</td><td>가끔 지우기 (추천)</td><td>✅ 적당</td><td>일반적으로 최적</td></tr>
+          <tr><td class="param-name">1e-3</td><td>자주 지우기</td><td>✅ 강함</td><td>데이터 적을 때 유용</td></tr>
+          <tr><td class="param-name">1e-2</td><td>너무 자주</td><td>⚠️ 과도</td><td>중요한 것도 지워질 수 있음</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- grad_clip 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🚦 grad_clip_norm — 그래디언트 폭발 방지</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-optim">설정값</th>
+          <th class="th-optim">제한 강도</th>
+          <th class="th-optim">안정성</th>
+          <th class="th-optim">설명</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="param-name">없음</td><td>제한 없음</td><td>❌ 폭발 위험</td><td>그래디언트가 무한히 커질 수 있음</td></tr>
+          <tr class="rec"><td class="param-name">0.5</td><td>엄격 (추천)</td><td>✅ 매우 안정</td><td>수정량 최대 0.5로 제한</td></tr>
+          <tr><td class="param-name">1.0</td><td>보통</td><td>✅ 안정</td><td>일반적인 Transformer 기본값</td></tr>
+          <tr><td class="param-name">5.0</td><td>느슨함</td><td>⚠️ 보통</td><td>거의 제한 안 함</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 5. 스케줄러 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-sched)">5</span> 학습 스케줄 — "공부 계획표"</h2>
+    <p class="section-desc">총 스텝 수, 워밍업, 코사인 감쇠 — 학습률을 시간에 따라 어떻게 변화시킬지 설정합니다.</p>
+
+    <div class="analogy-box ab-sched">
+      <div class="analogy-icon">📅</div>
+      <div>
+        <div class="analogy-title">비유: 마라톤 페이스 전략</div>
+        <p class="analogy-text">
+          <strong>Warmup</strong> = 출발 후 몸 풀며 천천히 속도 올리기,
+          <strong>Peak</strong> = 최고 속도로 달리기,
+          <strong>Decay</strong> = 결승선 앞에서 서서히 속도 줄이며 마무리.
+          처음부터 전력질주하면 금방 지치고, 끝까지 전력이면 마무리가 거칠어요!
+        </p>
+      </div>
+    </div>
+
+    <!-- 스케줄러 시각화 SVG -->
+    <div class="sched-visual">
+      <div style="text-align:center; font-weight:700; font-size:0.9rem; margin-bottom:1rem; color:var(--color-muted);">cosine_decay_with_warmup 학습률 변화 그래프</div>
+      <svg class="sched-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- 배경 그리드 -->
+        <line x1="60" y1="30" x2="60" y2="180" stroke="#E2E8F0" stroke-width="1"/>
+        <line x1="60" y1="180" x2="570" y2="180" stroke="#E2E8F0" stroke-width="1"/>
+        <line x1="60" y1="30" x2="570" y2="30" stroke="#E2E8F0" stroke-width="0.5" stroke-dasharray="4"/>
+        <line x1="60" y1="105" x2="570" y2="105" stroke="#E2E8F0" stroke-width="0.5" stroke-dasharray="4"/>
+        <line x1="60" y1="170" x2="570" y2="170" stroke="#E2E8F0" stroke-width="0.5" stroke-dasharray="4"/>
+
+        <!-- Y축 라벨 -->
+        <text x="8" y="35" font-size="10" fill="#64748B" font-family="JetBrains Mono">1e-4</text>
+        <text x="8" y="110" font-size="10" fill="#64748B" font-family="JetBrains Mono">5e-5</text>
+        <text x="8" y="175" font-size="10" fill="#64748B" font-family="JetBrains Mono">1e-6</text>
+        <text x="4" y="12" font-size="9" fill="#64748B" font-family="Noto Sans KR">학습률</text>
+
+        <!-- X축 라벨 -->
+        <text x="58" y="198" font-size="10" fill="#64748B" font-family="JetBrains Mono">0</text>
+        <text x="82" y="198" font-size="10" fill="#64748B" font-family="JetBrains Mono">5K</text>
+        <text x="220" y="198" font-size="10" fill="#64748B" font-family="JetBrains Mono">30K</text>
+        <text x="370" y="198" font-size="10" fill="#64748B" font-family="JetBrains Mono">60K</text>
+        <text x="540" y="198" font-size="10" fill="#64748B" font-family="JetBrains Mono">100K</text>
+        <text x="290" y="215" font-size="9" fill="#64748B" font-family="Noto Sans KR">학습 스텝</text>
+
+        <!-- Warmup 영역 -->
+        <rect x="60" y="25" width="30" height="160" fill="#FEF3C7" opacity="0.5" rx="2"/>
+        <text x="65" y="55" font-size="8" fill="#B45309" font-family="Noto Sans KR" font-weight="700">Warmup</text>
+
+        <!-- Decay 영역 -->
+        <rect x="90" y="25" width="480" height="160" fill="#EDE9FE" opacity="0.2" rx="2"/>
+
+        <!-- 곡선 -->
+        <path d="M60 175 L90 30 Q200 30 280 50 Q370 80 450 130 Q520 160 570 170" 
+              stroke="#7C3AED" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+        <!-- 포인트 -->
+        <circle cx="60" cy="175" r="4" fill="#D97706"/>
+        <circle cx="90" cy="30" r="5" fill="#DC2626"/>
+        <circle cx="570" cy="170" r="4" fill="#059669"/>
+
+        <!-- 라벨 -->
+        <text x="93" y="22" font-size="9" fill="#DC2626" font-weight="700" font-family="Noto Sans KR">peak_lr = 1e-4</text>
+        <text x="520" y="165" font-size="9" fill="#059669" font-weight="700" font-family="Noto Sans KR">decay_lr = 1e-6</text>
+      </svg>
+    </div>
+
+    <!-- 스케줄 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1rem 0 0.5rem;">⏱️ 학습 스텝 & 주기</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-sched">파라미터</th>
+          <th class="th-sched">작은 값</th>
+          <th class="th-sched">보통 값</th>
+          <th class="th-sched">큰 값</th>
+          <th class="th-sched">우리 설정</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="param-name">steps<br><span style="font-family:'Noto Sans KR';font-size:0.7rem;color:var(--color-muted);">총 학습량</span></td>
+            <td>10K~30K<br><span style="font-size:0.72rem;color:var(--color-muted);">빠른 테스트</span></td>
+            <td>50K~100K<br><span style="font-size:0.72rem;color:var(--color-muted);">일반 학습</span></td>
+            <td>200K+<br><span style="font-size:0.72rem;color:var(--color-muted);">대규모 데이터</span></td>
+            <td class="rec" style="font-weight:700;">100K</td>
+          </tr>
+          <tr>
+            <td class="param-name">eval_freq<br><span style="font-family:'Noto Sans KR';font-size:0.7rem;color:var(--color-muted);">평가 주기</span></td>
+            <td>500<br><span style="font-size:0.72rem;color:var(--color-muted);">촘촘히 확인</span></td>
+            <td>2K~5K<br><span style="font-size:0.72rem;color:var(--color-muted);">적당</span></td>
+            <td>10K<br><span style="font-size:0.72rem;color:var(--color-muted);">느슨하게</span></td>
+            <td class="rec" style="font-weight:700;">2K</td>
+          </tr>
+          <tr>
+            <td class="param-name">save_freq<br><span style="font-family:'Noto Sans KR';font-size:0.7rem;color:var(--color-muted);">저장 주기</span></td>
+            <td>500<br><span style="font-size:0.72rem;color:var(--color-muted);">디스크 많이 사용</span></td>
+            <td>2K~5K<br><span style="font-size:0.72rem;color:var(--color-muted);">적당</span></td>
+            <td>10K<br><span style="font-size:0.72rem;color:var(--color-muted);">디스크 절약</span></td>
+            <td class="rec" style="font-weight:700;">2K</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- warmup 비교 -->
+    <h3 style="font-size:1.05rem; font-weight:700; margin: 1.5rem 0 0.5rem;">🔥 워밍업 & 감쇠 비교</h3>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th class="th-sched">파라미터</th>
+          <th class="th-sched">설정값</th>
+          <th class="th-sched">총 스텝 대비</th>
+          <th class="th-sched">효과</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="param-name">warmup_steps</td>
+            <td>1K</td>
+            <td>1%</td>
+            <td>빠르게 시작 (불안정 가능)</td>
+          </tr>
+          <tr class="rec">
+            <td class="param-name">warmup_steps</td>
+            <td>5K</td>
+            <td>5% (추천)</td>
+            <td>안정적 시작</td>
+          </tr>
+          <tr>
+            <td class="param-name">warmup_steps</td>
+            <td>10K</td>
+            <td>10%</td>
+            <td>매우 신중한 시작</td>
+          </tr>
+          <tr>
+            <td class="param-name">peak_lr</td>
+            <td colspan="2" class="rec">1e-4 (추천)</td>
+            <td>최고 학습률 = optimizer.lr과 동일</td>
+          </tr>
+          <tr>
+            <td class="param-name">decay_lr</td>
+            <td colspan="2" class="rec">1e-6 (추천)</td>
+            <td>최종 학습률 (거의 멈춤)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 6. 프리셋 카드 ===== -->
+<section>
+  <div class="container">
+    <h2 class="section-title"><span class="section-num" style="background:var(--color-primary)">6</span> 상황별 추천 프리셋</h2>
+    <p class="section-desc">태스크 복잡도와 데이터량에 따른 3가지 추천 설정 조합입니다.</p>
+
+    <div class="preset-grid">
+      <!-- 입문 -->
+      <div class="preset-card">
+        <div class="preset-header" style="background: linear-gradient(135deg, #059669, #10B981)">
+          <div class="preset-emoji">🌱</div>
+          <h4>입문: 빠른 테스트</h4>
+        </div>
+        <div class="preset-body">
+          <div class="preset-row"><span class="preset-key">dim_model</span><span class="preset-val">128</span></div>
+          <div class="preset-row"><span class="preset-key">dim_feedforward</span><span class="preset-val">512</span></div>
+          <div class="preset-row"><span class="preset-key">encoder/decoder</span><span class="preset-val">2 / 1</span></div>
+          <div class="preset-row"><span class="preset-key">chunk_size</span><span class="preset-val">20</span></div>
+          <div class="preset-row"><span class="preset-key">n_action_steps</span><span class="preset-val">10</span></div>
+          <div class="preset-row"><span class="preset-key">backbone</span><span class="preset-val">resnet18 동결</span></div>
+          <div class="preset-row"><span class="preset-key">steps</span><span class="preset-val">20K</span></div>
+          <div class="preset-note">📌 데이터 10~20개, 단순 pick & place. 파이프라인 검증용. 학습 ~30분.</div>
+        </div>
+      </div>
+      <!-- 표준 (우리 설정) -->
+      <div class="preset-card" style="border: 2px solid var(--color-primary); box-shadow: 0 4px 12px rgba(124,58,237,0.15);">
+        <div class="preset-header" style="background: linear-gradient(135deg, #4C1D95, #7C3AED)">
+          <div class="preset-emoji">⭐</div>
+          <h4>표준: 우리 설정 (추천)</h4>
+        </div>
+        <div class="preset-body">
+          <div class="preset-row"><span class="preset-key">dim_model</span><span class="preset-val">384</span></div>
+          <div class="preset-row"><span class="preset-key">dim_feedforward</span><span class="preset-val">1024</span></div>
+          <div class="preset-row"><span class="preset-key">encoder/decoder</span><span class="preset-val">3 / 1</span></div>
+          <div class="preset-row"><span class="preset-key">chunk_size</span><span class="preset-val">50</span></div>
+          <div class="preset-row"><span class="preset-key">n_action_steps</span><span class="preset-val">20</span></div>
+          <div class="preset-row"><span class="preset-key">backbone</span><span class="preset-val">resnet18 + lr=1e-5</span></div>
+          <div class="preset-row"><span class="preset-key">steps</span><span class="preset-val">100K</span></div>
+          <div class="preset-note">📌 데이터 30개, 색상 구분 필요, RTX 4090. 학습 ~2~3시간.</div>
+        </div>
+      </div>
+      <!-- 고급 -->
+      <div class="preset-card">
+        <div class="preset-header" style="background: linear-gradient(135deg, #B45309, #D97706)">
+          <div class="preset-emoji">🔥</div>
+          <h4>고급: 최고 성능 추구</h4>
+        </div>
+        <div class="preset-body">
+          <div class="preset-row"><span class="preset-key">dim_model</span><span class="preset-val">512</span></div>
+          <div class="preset-row"><span class="preset-key">dim_feedforward</span><span class="preset-val">2048</span></div>
+          <div class="preset-row"><span class="preset-key">encoder/decoder</span><span class="preset-val">4 / 2</span></div>
+          <div class="preset-row"><span class="preset-key">chunk_size</span><span class="preset-val">100</span></div>
+          <div class="preset-row"><span class="preset-key">n_action_steps</span><span class="preset-val">30</span></div>
+          <div class="preset-row"><span class="preset-key">backbone</span><span class="preset-val">resnet50 + lr=1e-5</span></div>
+          <div class="preset-row"><span class="preset-key">steps</span><span class="preset-val">200K+</span></div>
+          <div class="preset-note">📌 데이터 100개+, 다관절 정밀 작업. 학습 ~6~10시간. VRAM 16GB+ 필요.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 심화: 파라미터 상호 관계 -->
+    <div class="accordion" style="margin-top:1.5rem;">
+      <input type="checkbox" id="acc-relation" class="accordion-toggle" hidden>
+      <label for="acc-relation" class="accordion-header">
+        <span>📎 심화: 파라미터 간 상호 관계</span>
+        <span class="accordion-chevron">▸</span>
+      </label>
+      <div class="accordion-body">
+        <p style="line-height:1.7; font-size:0.9rem; margin-bottom:1rem;">파라미터들은 독립적이지 않고, 서로 영향을 미쳐요.</p>
+        <div style="background:var(--color-surface); border-radius:10px; padding:1.25rem; font-size:0.85rem; line-height:1.8;">
+          <strong>① dim_model ↑ → 메모리 ↑ → batch_size ↓ 필요</strong><br>
+          뇌가 커지면 GPU 메모리를 많이 써서, 한 번에 처리하는 데이터를 줄여야 해요.<br><br>
+          <strong>② chunk_size ↑ → 부드러움 ↑ → 학습 난이도 ↑</strong><br>
+          멀리 계획할수록 부드럽지만, AI가 예측해야 할 양이 많아져 학습이 어려워져요.<br><br>
+          <strong>③ dropout ↑ + 데이터 ↓ → 더 나은 일반화</strong><br>
+          데이터가 적으면 dropout을 높여서 과적합을 방지하는 게 효과적이에요.<br><br>
+          <strong>④ lr ↑ + grad_clip ↓ → 불안정 위험</strong><br>
+          큰 보폭 + 제한 없음은 학습이 폭발할 수 있어요. 반드시 함께 조절!<br><br>
+          <strong>⑤ backbone 동결 + 색상 태스크 → 실패 위험!</strong><br>
+          ImageNet 특징은 형태 중심이라, 색상만 다른 물체 구분에 실패합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion" style="margin-top:0.75rem;">
+      <input type="checkbox" id="acc-data" class="accordion-toggle" hidden>
+      <label for="acc-data" class="accordion-header">
+        <span>📎 심화: 데이터 수 vs 모델 크기 가이드</span>
+        <span class="accordion-chevron">▸</span>
+      </label>
+      <div class="accordion-body">
+        <div class="cmp-table-wrap">
+          <table class="cmp-table" style="min-width:500px;">
+            <thead><tr>
+              <th class="th-brain">데이터(에피소드) 수</th>
+              <th class="th-brain">추천 dim_model</th>
+              <th class="th-brain">추천 dropout</th>
+              <th class="th-brain">추천 steps</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>5~10개</td><td>128</td><td>0.2~0.3</td><td>10K~20K</td></tr>
+              <tr><td>20~30개</td><td>256~384</td><td>0.1~0.2</td><td>50K~100K</td></tr>
+              <tr><td>50~100개</td><td>384~512</td><td>0.05~0.1</td><td>100K~200K</td></tr>
+              <tr><td>200개+</td><td>512</td><td>0.0~0.05</td><td>200K+</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.85rem; color:var(--color-muted); margin-top:0.75rem; line-height:1.6;">
+          데이터가 적으면 작은 모델 + 높은 dropout, 데이터가 많으면 큰 모델 + 낮은 dropout이 원칙이에요.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== 핵심 정리 ===== -->
+<section>
+  <div class="container">
+    <div class="key-points">
+      <h3>📌 핵심 정리</h3>
+      <div class="kp-item">
+        <div class="kp-num">1</div>
+        <div class="kp-text"><strong>dim_model / dim_feedforward</strong>는 뇌의 크기와 고속도로 폭. 384/1024 조합이 SO-101 실험의 균형점.</div>
+      </div>
+      <div class="kp-item">
+        <div class="kp-num">2</div>
+        <div class="kp-text"><strong>인코더 3 > 디코더 1</strong> — "이해"가 "실행"보다 더 깊은 처리가 필요.</div>
+      </div>
+      <div class="kp-item">
+        <div class="kp-num">3</div>
+        <div class="kp-text"><strong>chunk_size=50, n_action_steps=20</strong> — 멀리 계획하고(50) 가까이만 실행(20)해서 부드러움 + 정확함 확보.</div>
+      </div>
+      <div class="kp-item">
+        <div class="kp-num">4</div>
+        <div class="kp-text"><strong>색상 구분 태스크는 backbone 동결 해제 필수!</strong> backbone_lr=0.0이면 색상을 학습하지 못함. (Issue #1774)</div>
+      </div>
+      <div class="kp-item">
+        <div class="kp-num">5</div>
+        <div class="kp-text"><strong>cosine_decay_with_warmup</strong> 스케줄러로 "준비 → 전력 → 마무리" 패턴 적용. warmup 5% 권장.</div>
+      </div>
+      <div class="kp-item">
+        <div class="kp-num">6</div>
+        <div class="kp-text">파라미터는 서로 연동됨. <strong>데이터 수 → 모델 크기 → dropout → steps</strong>를 함께 조절해야 최적의 결과를 얻을 수 있음.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <span class="footer-brand">ZETA Satellite Robotics</span> · Physical AI Education<br>
+    <span style="font-size:0.72rem;">ACT 파라미터 완전 가이드 — 설정값 비교표 · 2025</span>
+  </div>
+</footer>
+
+</body>
+</html>

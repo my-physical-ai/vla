@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌐 Scout Report — HuggingFace 모델 오프라인 복사 해결</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.8;
+    padding: 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* 히어로 */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    padding: 48px 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: #000;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .hero h1 span { color: #00d4ff; }
+  .hero p { color: #8b949e; font-size: 15px; }
+
+  /* 카드 공통 */
+  .card {
+    background: #12121a;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon {
+    font-size: 24px;
+  }
+
+  /* 문제 요약 */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .problem-item {
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .problem-item .label {
+    font-size: 12px;
+    color: #8b949e;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .problem-item .value {
+    font-size: 15px;
+    color: #e0e0e8;
+    font-weight: 500;
+  }
+
+  /* 사이트 목록 */
+  .site-list { list-style: none; }
+  .site-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #1e1e2e;
+    font-size: 14px;
+  }
+  .site-list li:last-child { border-bottom: none; }
+  .site-star { color: #ff6b35; }
+  .site-name { color: #00d4ff; font-family: 'JetBrains Mono', monospace; font-size: 13px; min-width: 260px; }
+  .site-result { color: #8b949e; }
+
+  /* 해결책 */
+  .solution {
+    background: #0d1117;
+    border-left: 4px solid #00d4ff;
+    border-radius: 0 10px 10px 0;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .solution.alt { border-left-color: #ff6b35; }
+  .solution.warn { border-left-color: #f0c040; }
+  .solution-rank {
+    display: inline-block;
+    background: #00d4ff;
+    color: #000;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .solution.alt .solution-rank { background: #ff6b35; }
+  .solution.warn .solution-rank { background: #f0c040; color: #000; }
+  .solution h3 {
+    font-size: 17px;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .solution p { font-size: 14px; color: #c0c0c8; margin-bottom: 10px; }
+
+  pre {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #e6e6e6;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.6;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #1a1a2e;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #00d4ff;
+  }
+
+  /* 원인 분석 */
+  .cause-box {
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .cause-box h4 {
+    color: #ff6b35;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .cause-box p { font-size: 14px; color: #b0b0b8; }
+
+  /* 참고 링크 */
+  .ref-list { list-style: none; }
+  .ref-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #1e1e2e;
+    font-size: 13px;
+  }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list a {
+    color: #00d4ff;
+    text-decoration: none;
+  }
+  .ref-list a:hover { text-decoration: underline; }
+  .ref-list .desc { color: #8b949e; margin-left: 8px; }
+
+  /* 체크리스트 */
+  .checklist { list-style: none; counter-reset: step; }
+  .checklist li {
+    padding: 12px 0 12px 40px;
+    border-bottom: 1px solid #1e1e2e;
+    position: relative;
+    font-size: 14px;
+    color: #c0c0c8;
+  }
+  .checklist li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 28px;
+    height: 28px;
+    background: #00d4ff;
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* 비교표 */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+  .compare-table th {
+    background: #1a1a2e;
+    color: #00d4ff;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 2px solid #2a2a3e;
+  }
+  .compare-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #1e1e2e;
+    font-size: 13px;
+    color: #c0c0c8;
+  }
+  .compare-table tr:hover td { background: #16162a; }
+  .badge-good { color: #3fb950; font-weight: 600; }
+  .badge-bad { color: #f85149; font-weight: 600; }
+  .badge-ok { color: #f0c040; font-weight: 600; }
+
+  /* 인쇄 */
+  .print-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: #000;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .print-btn:hover { opacity: 0.9; }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .card { border: 1px solid #ddd; background: #fff; }
+    .hero { background: #f5f5f5; border-color: #ddd; }
+    .print-btn { display: none; }
+    pre { background: #f5f5f5; border-color: #ddd; color: #333; }
+    code { background: #eee; color: #0066cc; }
+  }
+
+  @media (max-width: 768px) {
+    .problem-grid { grid-template-columns: 1fr; }
+    .site-name { min-width: auto; }
+    body { padding: 12px; }
+    .hero { padding: 28px 20px; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 히어로 -->
+  <div class="hero">
+    <div class="hero-badge">🌐 GLOBAL SITE SCOUT — 기본 모드</div>
+    <h1>HuggingFace 모델 <span>USB 복사 에러</span> 해결 리포트</h1>
+    <p>🧠 카테고리: HuggingFace / AI 모델 | 📅 2026-07-08 | 🔍 탐색 사이트: 12개</p>
+  </div>
+
+  <!-- ① 문제 요약 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🔍</span> 문제 요약</div>
+    <div class="problem-grid">
+      <div class="problem-item">
+        <div class="label">문제 분류</div>
+        <div class="value">모델 캐시 이동/복사 시 에러</div>
+      </div>
+      <div class="problem-item">
+        <div class="label">추정 원인</div>
+        <div class="value">심볼릭 링크 깨짐 + 메타데이터 불일치</div>
+      </div>
+      <div class="problem-item">
+        <div class="label">영향 범위</div>
+        <div class="value">SmolVLA 모델 오프라인 배포</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 원인 분석 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🔬</span> 에러 원인 분석 (3가지 원인 교차 확인)</div>
+
+    <div class="cause-box">
+      <h4>원인 1: 심볼릭 링크(Symlink) 깨짐 — 7개 사이트에서 교차 확인</h4>
+      <p>HuggingFace 캐시(<code>~/.cache/huggingface/hub/</code>)의 내부 구조는 <code>blobs/</code>에 실제 파일이 있고, <code>snapshots/해시/</code> 안의 파일들은 <strong>심볼릭 링크</strong>로 blob을 가리킵니다. USB(FAT32/exFAT)는 심볼릭 링크를 지원하지 않아서 <code>cp</code> 명령으로 복사하면 링크가 깨지거나 0바이트 파일이 됩니다.</p>
+    </div>
+
+    <div class="cause-box">
+      <h4>원인 2: 메타데이터/리비전 불일치 — 5개 사이트에서 교차 확인</h4>
+      <p>캐시 폴더의 <code>refs/main</code> 파일이 커밋 해시를 가리키는데, 이 해시와 <code>snapshots/</code> 폴더명이 일치해야 합니다. 복사 과정에서 이 매핑이 깨지면 <code>LocalEntryNotFoundError: Cannot find an appropriate cached snapshot folder</code> 에러가 발생합니다.</p>
+    </div>
+
+    <div class="cause-box">
+      <h4>원인 3: Hub 버전 체크 시도 — 4개 사이트에서 교차 확인</h4>
+      <p>캐시에서 로드하더라도 <code>huggingface_hub</code>는 기본적으로 HTTP 요청을 보내 새 버전이 있는지 확인합니다. 오프라인 환경(교육생 PC)에서 이 요청이 실패하면 에러가 발생합니다. <code>HF_HUB_OFFLINE=1</code> 환경변수가 필요합니다.</p>
+    </div>
+  </div>
+
+  <!-- ② 탐색 사이트 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🌐</span> 탐색한 사이트 목록</div>
+    <ul class="site-list">
+      <li><span class="site-star">⭐⭐⭐</span> <span class="site-name">huggingface.co/docs (다운로드)</span> <span class="site-result">snapshot_download + local_dir 공식 가이드</span></li>
+      <li><span class="site-star">⭐⭐⭐</span> <span class="site-name">huggingface.co/docs (환경변수)</span> <span class="site-result">HF_HUB_OFFLINE, HF_HUB_CACHE 공식 문서</span></li>
+      <li><span class="site-star">⭐⭐⭐</span> <span class="site-name">discuss.huggingface.co</span> <span class="site-result">로컬 백업 가이드 (save_pretrained 권장)</span></li>
+      <li><span class="site-star">⭐⭐</span> <span class="site-name">huggingface.co/docs (설치)</span> <span class="site-result">오프라인 모드 공식 가이드</span></li>
+      <li><span class="site-star">⭐⭐</span> <span class="site-name">github.com/huggingface/datasets</span> <span class="site-result">캐시 이식성 이슈 #5585 — symlink 문제 확인</span></li>
+      <li><span class="site-star">⭐⭐</span> <span class="site-name">github.com/urchade/GLiNER</span> <span class="site-result">Docker 컨테이너 캐시 복사 에러 사례</span></li>
+      <li><span class="site-star">⭐⭐</span> <span class="site-name">github.com/huggingface/transformers</span> <span class="site-result">캐시 마이그레이션 에러 이슈 #29178, #19112</span></li>
+      <li><span class="site-star">⭐</span> <span class="site-name">github.com/huggingface/diffusers</span> <span class="site-result">HF_HUB_OFFLINE 동작 이슈 #6168</span></li>
+      <li><span class="site-star">⭐</span> <span class="site-name">github.com/qdrant/fastembed</span> <span class="site-result">오프라인 모드 캐시 우회 버그 사례</span></li>
+      <li><span class="site-star">⭐</span> <span class="site-name">medium.com (Bing)</span> <span class="site-result">오프라인 HF 모델 사용법 정리</span></li>
+      <li><span class="site-star">⭐</span> <span class="site-name">clay-atlas.com</span> <span class="site-result">snapshot_download 실전 가이드</span></li>
+      <li><span class="site-star">⭐</span> <span class="site-name">deepnote.com</span> <span class="site-result">huggingface_hub 라이브러리 완전 가이드</span></li>
+    </ul>
+  </div>
+
+  <!-- ③ 해결책 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">💡</span> 해결책 (우선순위 순)</div>
+
+    <!-- 1순위 -->
+    <div class="solution">
+      <div class="solution-rank">1순위 — 가장 확실한 방법 (교육 현장 추천)</div>
+      <h3>snapshot_download --local-dir 로 "클린 폴더" 생성 후 USB 복사</h3>
+      <p>캐시 폴더를 직접 복사하지 말고, <strong>심볼릭 링크 없는 독립 폴더</strong>를 만들어서 복사합니다. HuggingFace 공식 권장 방법입니다.</p>
+
+      <p><strong>선생님 PC에서 실행 (인터넷 있는 환경, 1회만):</strong></p>
+<pre># Python 스크립트로 클린 폴더 생성
+python3 -c "
+from huggingface_hub import snapshot_download
+
+# SmolVLA fine-tuned 모델
+snapshot_download(
+    repo_id='ch1234bigman/pink_task_smolvla_model',
+    local_dir='/home/zetabank/usb_models/pink_task_smolvla_model'
+)
+"</pre>
+
+      <p><strong>USB에 복사:</strong></p>
+<pre># USB 마운트 확인
+lsblk
+
+# 클린 폴더를 USB로 복사 (심볼릭 링크 없으므로 안전)
+cp -r /home/zetabank/usb_models/pink_task_smolvla_model /media/zetabank/USB이름/</pre>
+
+      <p><strong>교육생 PC에서 실행:</strong></p>
+<pre># USB에서 원하는 위치로 복사
+cp -r /media/학생이름/USB이름/pink_task_smolvla_model ~/my_models/
+
+# 로컬 경로로 직접 실행 (HF 로그인 불필요!)
+lerobot-rollout \
+  --strategy.type=dagger \
+  --strategy.num_episodes=20 \
+  --policy.path=~/my_models/pink_task_smolvla_model \
+  --robot.type=so101_follower \
+  --robot.port=/dev/ttyACM0 \
+  --robot.cameras="{ front: {type: opencv, index_or_path: 6, width: 640, height: 480, fps: 30} }" \
+  --teleop.type=so101_leader \
+  --teleop.port=/dev/ttyACM1 \
+  --dataset.repo_id=data/dagger_corrections \
+  --dataset.single_task="pink block into the box of yellow" \
+  --dataset.push_to_hub=false \
+  --display_data=true</pre>
+      <p>핵심: <code>--policy.path</code>에 HuggingFace repo_id 대신 <strong>로컬 폴더 경로</strong>를 넣으면 됩니다.</p>
+    </div>
+
+    <!-- 2순위 -->
+    <div class="solution alt">
+      <div class="solution-rank">2순위 — CLI 원라이너 방식</div>
+      <h3>hf download 명령어로 클린 폴더 생성</h3>
+      <p>Python 스크립트 대신 터미널 한 줄로 동일한 효과를 얻을 수 있습니다.</p>
+<pre># 선생님 PC에서 (인터넷 환경)
+hf download ch1234bigman/pink_task_smolvla_model \
+  --local-dir /home/zetabank/usb_models/pink_task_smolvla_model</pre>
+      <p>결과 폴더에는 <code>config.json</code>, <code>model.safetensors</code>, <code>config.yaml</code> 등이 직접 들어있어서 USB 복사가 안전합니다.</p>
+    </div>
+
+    <!-- 3순위 -->
+    <div class="solution warn">
+      <div class="solution-rank">3순위 — 캐시 폴더를 반드시 복사해야 할 경우</div>
+      <h3>cp -rL (심볼릭 링크 실체화) + HF_HUB_OFFLINE=1</h3>
+      <p>캐시 구조를 유지하면서 복사해야 한다면 <code>-L</code> 옵션으로 심볼릭 링크를 실제 파일로 변환합니다.</p>
+<pre># -L 옵션이 핵심! 심볼릭 링크를 실제 파일로 복사
+cp -rL ~/.cache/huggingface/hub/models--ch1234bigman--pink_task_smolvla_model /media/zetabank/USB이름/
+
+# 교육생 PC에서 캐시 폴더에 넣기
+mkdir -p ~/.cache/huggingface/hub/
+cp -r /media/학생이름/USB이름/models--ch1234bigman--pink_task_smolvla_model ~/.cache/huggingface/hub/
+
+# 오프라인 모드 활성화 (Hub 접속 시도 차단)
+echo 'export HF_HUB_OFFLINE=1' >> ~/.bashrc
+source ~/.bashrc</pre>
+      <p>⚠️ 주의: 의존 모델(SmolVLA base 등)도 함께 복사해야 합니다. <code>ls ~/.cache/huggingface/hub/ | grep smolvla</code>로 확인하세요.</p>
+    </div>
+  </div>
+
+  <!-- 방법 비교표 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span> 3가지 방법 비교</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>1순위: snapshot_download</th>
+          <th>2순위: hf download CLI</th>
+          <th>3순위: cp -rL 캐시 복사</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>심볼릭 링크 문제</td>
+          <td class="badge-good">✅ 없음</td>
+          <td class="badge-good">✅ 없음</td>
+          <td class="badge-ok">⚠️ -L 필수</td>
+        </tr>
+        <tr>
+          <td>USB 복사 안전성</td>
+          <td class="badge-good">완전 안전</td>
+          <td class="badge-good">완전 안전</td>
+          <td class="badge-ok">주의 필요</td>
+        </tr>
+        <tr>
+          <td>의존 모델 관리</td>
+          <td class="badge-good">자동 포함</td>
+          <td class="badge-good">자동 포함</td>
+          <td class="badge-bad">수동 확인 필요</td>
+        </tr>
+        <tr>
+          <td>교육생 명령어 수정</td>
+          <td class="badge-ok">로컬 경로 필요</td>
+          <td class="badge-ok">로컬 경로 필요</td>
+          <td class="badge-good">기존 명령어 그대로</td>
+        </tr>
+        <tr>
+          <td>HF 로그인 필요</td>
+          <td class="badge-good">❌ 불필요</td>
+          <td class="badge-good">❌ 불필요</td>
+          <td class="badge-good">❌ 불필요</td>
+        </tr>
+        <tr>
+          <td>교육 현장 추천</td>
+          <td class="badge-good">⭐ 최추천</td>
+          <td class="badge-good">⭐ 추천</td>
+          <td class="badge-bad">비추천</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 교육 배포 스크립트 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🎓</span> 교육 현장용 배포 스크립트 (선생님용)</div>
+    <p style="color:#8b949e; font-size:14px; margin-bottom:16px;">이 스크립트를 선생님 PC에서 한 번 실행하면, USB에 교육생 배포용 클린 모델 폴더가 만들어집니다.</p>
+<pre>#!/bin/bash
+# prepare_student_models.sh — 교육생 배포용 모델 준비
+# 선생님 PC에서 실행 (인터넷 + HuggingFace 로그인 필요)
+
+USB_PATH="/media/zetabank/USB이름"  # USB 경로 수정
+TEMP_DIR="/home/zetabank/student_models"
+
+echo "📦 [1/3] 모델 다운로드 (클린 폴더로)..."
+mkdir -p ${TEMP_DIR}
+
+python3 -c "
+from huggingface_hub import snapshot_download
+snapshot_download(
+    repo_id='ch1234bigman/pink_task_smolvla_model',
+    local_dir='${TEMP_DIR}/pink_task_smolvla_model'
+)
+print('✅ 다운로드 완료')
+"
+
+echo "📋 [2/3] USB로 복사..."
+cp -r ${TEMP_DIR}/pink_task_smolvla_model ${USB_PATH}/
+echo "✅ USB 복사 완료"
+
+echo "📝 [3/3] 교육생 설치 스크립트 생성..."
+cat > ${USB_PATH}/install_model.sh << 'SCRIPT'
+#!/bin/bash
+# 교육생 PC에서 실행
+MODEL_DIR="$HOME/lerobot_models"
+mkdir -p ${MODEL_DIR}
+cp -r "$(dirname "$0")/pink_task_smolvla_model" ${MODEL_DIR}/
+echo "✅ 모델 설치 완료!"
+echo "📁 경로: ${MODEL_DIR}/pink_task_smolvla_model"
+echo ""
+echo "🤖 실행 예시:"
+echo "lerobot-rollout --policy.path=${MODEL_DIR}/pink_task_smolvla_model ..."
+SCRIPT
+chmod +x ${USB_PATH}/install_model.sh
+
+echo ""
+echo "🎉 완료! USB를 교육생에게 배포하세요."
+echo "교육생은 USB에서 ./install_model.sh 실행 후 사용 가능합니다."</pre>
+  </div>
+
+  <!-- ⑤ 참고 링크 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📌</span> 참고 링크</div>
+    <ul class="ref-list">
+      <li><a href="https://huggingface.co/docs/huggingface_hub/en/guides/download" target="_blank">HuggingFace Docs — Download files from the Hub</a> <span class="desc">snapshot_download + local_dir 공식 가이드</span></li>
+      <li><a href="https://huggingface.co/docs/huggingface_hub/en/package_reference/environment_variables" target="_blank">HuggingFace Docs — 환경 변수</a> <span class="desc">HF_HUB_OFFLINE, HF_HUB_CACHE 설정 방법</span></li>
+      <li><a href="https://huggingface.co/docs/transformers/main/en/installation" target="_blank">Transformers Docs — 오프라인 모드</a> <span class="desc">HF_HUB_OFFLINE=1 사용법</span></li>
+      <li><a href="https://discuss.huggingface.co/t/local-model-backups/171119" target="_blank">HuggingFace Forums — Local Model Backups</a> <span class="desc">save_pretrained vs snapshot_download 비교 가이드</span></li>
+      <li><a href="https://github.com/huggingface/datasets/issues/5585" target="_blank">GitHub — 캐시 이식성 이슈 #5585</a> <span class="desc">캐시가 다른 머신으로 이동 불가능한 문제 리포트</span></li>
+      <li><a href="https://github.com/urchade/GLiNER/issues/162" target="_blank">GitHub — Docker 캐시 복사 에러 #162</a> <span class="desc">LocalEntryNotFoundError 사례 및 해결</span></li>
+    </ul>
+  </div>
+
+  <!-- ⑥ 체크리스트 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🚀</span> 다음 시도 체크리스트</div>
+    <ol class="checklist">
+      <li>선생님 PC에서 <code>snapshot_download</code> 또는 <code>hf download --local-dir</code>로 클린 모델 폴더 생성</li>
+      <li>생성된 폴더에 <code>config.json</code>, <code>model.safetensors</code> 등이 실제 파일로 있는지 확인 (<code>ls -la</code>로 심볼릭 링크 여부 체크)</li>
+      <li>USB에 복사 후 파일 크기가 원본과 동일한지 확인 (<code>du -sh</code>)</li>
+      <li>교육생 PC에서 <code>~/lerobot_models/</code> 폴더로 복사</li>
+      <li><code>lerobot-rollout --policy.path=~/lerobot_models/pink_task_smolvla_model</code>로 로컬 경로 지정하여 실행</li>
+      <li>실행 시 Hub 접속 에러가 나면 <code>export HF_HUB_OFFLINE=1</code> 추가</li>
+    </ol>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ 리포트 인쇄</button>
+
+</div>
+</body>
+</html>
