@@ -1,0 +1,83 @@
+lerobot-record \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ arm: {type: opencv, index_or_path: \"/dev/wrist_cam\", width: 640, height: 480, fps: 30, fourcc: \"MJPG\"}, top: {type: intelrealsense, serial_number_or_name: \"138422072965\", width: 640, height: 480, fps: 30, warmup_s: 15}}" \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --display_data=true \
+    --dataset.repo_id=data/blue_ring_green_pole_v1 \
+    --dataset.push_to_hub=false \
+    --dataset.num_episodes=10 \
+    --dataset.single_task="Pick up the blue ring and place it on the green pole" \
+    --dataset.streaming_encoding=true \
+    --dataset.encoder_threads=2
+    
+    
+    cd /home/zeta/lerobot
+pip install -e ".[smolvla]" --break-system-packages
+ =============================================================================
+ 
+ PYTORCH_ALLOC_CONF=expandable_segments:True \
+lerobot-train \
+  --policy.path=lerobot/smolvla_base \
+  --dataset.repo_id=data/blue_ring_green_pole_v1_20260710_094937 \
+  --policy.device=cuda \
+  --output_dir=/home/zeta/lerobot_outputs/smolvla_blue_ring_v1 \
+  --job_name=smolvla_blue_ring_v1 \
+  --batch_size=64 \
+  --steps=16000 \
+  --save_freq=4000 \
+  --log_freq=100 \
+  --dataset.image_transforms.enable=true \
+  --policy.freeze_vision_encoder=false \
+  --policy.push_to_hub=false \
+  --wandb.enable=false
+
+# 학습 완료 후 n_action_steps 수정
+CONFIG="/home/zeta/lerobot_outputs/smolvla_blue_ring_v1/checkpoints/last/pretrained_model/config.json"
+if [ -f "$CONFIG" ]; then
+  sed -i 's/"n_action_steps": 1/"n_action_steps": 50/' "$CONFIG"
+  echo "✅ n_action_steps=50 적용 완료"
+fi
+
+=======================================================================   
+
+lerobot-rollout \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ arm: {type: opencv, index_or_path: \"/dev/wrist_cam\", width: 640, height: 480, fps: 30, fourcc: \"MJPG\"}, top: {type: intelrealsense, serial_number_or_name: \"138422072965\", width: 640, height: 480, fps: 30, warmup_s: 15}}" \
+    --policy.path=/home/zeta/lerobot_outputs/smolvla_blue_ring_v1/checkpoints/last/pretrained_model \
+    --policy.device=cuda \
+    --policy.use_amp=false \
+    --rename_map='{"observation.images.arm": "observation.images.camera1", "observation.images.top": "observation.images.camera2"}' \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --inference.type=rtc \
+    --strategy.type=base \
+    --display_data=false
+    
+인간 개입으로 수정하고 저장하는 기능 : 파인튜닝과 수정된 기능이 많으면 학습 병합
+=====================================================================================
+lerobot-rollout \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=my_follower \
+    --robot.cameras="{ arm: {type: opencv, index_or_path: \"/dev/wrist_cam\", width: 640, height: 480, fps: 30, fourcc: \"MJPG\"}, top: {type: intelrealsense, serial_number_or_name: \"138422072965\", width: 640, height: 480, fps: 30, warmup_s: 15}}" \
+    --policy.path=/home/zeta/lerobot_outputs/smolvla_blue_ring_v1/checkpoints/last/pretrained_model \
+    --policy.device=cuda \
+    --policy.use_amp=false \
+    --rename_map='{"observation.images.arm": "observation.images.camera1", "observation.images.top": "observation.images.camera2"}' \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=my_leader \
+    --inference.type=rtc \
+    --strategy.type=dagger \
+    --dataset.repo_id=rollout_dagger_blue_ring_v1 \
+    --dataset.single_task="Pick up the blue ring and place it on the green pole" \
+    --dataset.push_to_hub=false \
+    --display_data=false
+    
